@@ -3,6 +3,8 @@ import { ConfigProvider, Layout, Menu, MenuProps, SiderProps } from 'antd';
 import {
   BranchesOutlined,
   InfoCircleOutlined,
+  LaptopOutlined,
+  OrderedListOutlined,
   PieChartOutlined,
   UserOutlined,
 } from '@ant-design/icons';
@@ -39,16 +41,25 @@ const getItem = (
 
 const items: MenuProps['items'] = [
   getItem('Dashboards', 'dashboards', <PieChartOutlined />, [
-    getItem(<Link to={PATH_DASHBOARD.default}>Default</Link>, 'default', null),
+    getItem(
+      <Link to={PATH_DASHBOARD.default}>Default</Link>,
+      'default',
+      <PieChartOutlined />
+    ),
 
-    getItem(<Link to={PATH_DASHBOARD.social}>Logs list</Link>, 'social', null),
+    getItem(
+      <Link to={PATH_DASHBOARD.social}>Logs list</Link>,
+      'social',
+      <OrderedListOutlined />
+    ),
 
     getItem(
       <Link to={PATH_DASHBOARD.logistics}>Agents</Link>,
       'logistics',
-      null
+      <LaptopOutlined />
     ),
   ]),
+
   getItem(
     <Link to={PATH_ABOUT.root}>About</Link>,
     'about',
@@ -76,7 +87,7 @@ const rootSubmenuKeys = ['dashboards', 'corporate', 'user-profile'];
 
 type SideNavProps = SiderProps;
 
-const SideNav = ({ ...others }: SideNavProps) => {
+const SideNav = ({ collapsed, ...others }: SideNavProps) => {
   const nodeRef = useRef(null);
   const { pathname } = useLocation();
   const [openKeys, setOpenKeys] = useState(['']);
@@ -102,7 +113,13 @@ const SideNav = ({ ...others }: SideNavProps) => {
   }, [pathname]);
 
   return (
-    <Sider ref={nodeRef} breakpoint="lg" collapsedWidth="0" {...others}>
+    <Sider
+      ref={nodeRef}
+      collapsed={collapsed}
+      breakpoint="lg"
+      collapsedWidth="80"
+      {...others}
+    >
       <Logo
         color="black"
         asLink
@@ -111,6 +128,7 @@ const SideNav = ({ ...others }: SideNavProps) => {
         gap="small"
         imgSize={{ h: 28, w: 28 }}
         style={{ padding: '1rem 0' }}
+        collapsed={collapsed}
       />
       <ConfigProvider
         theme={{

@@ -1,7 +1,5 @@
 import { Flex, FlexProps, theme, Typography } from 'antd';
-import { Link } from 'react-router-dom';
 import { CSSProperties } from 'react';
-
 import './styles.css';
 
 type LogoProps = {
@@ -13,14 +11,15 @@ type LogoProps = {
   asLink?: boolean;
   href?: string;
   bgColor?: CSSProperties['backgroundColor'];
+  collapsed?: boolean; // Add collapsed prop
 } & Partial<FlexProps>;
 
 export const Logo = ({
   asLink,
   color,
-  href,
   imgSize,
   bgColor,
+  collapsed,
   ...others
 }: LogoProps) => {
   const {
@@ -28,13 +27,14 @@ export const Logo = ({
   } = theme.useToken();
 
   return asLink ? (
-    <Link to={href || '#'} className="logo-link">
-      <Flex gap={others.gap || 'small'} align="center" {...others}>
-        <img
-          src="/logo-no-background.png"
-          alt="design sparx logo"
-          height={imgSize?.h || 48}
-        />
+    <Flex gap={others.gap || 'small'} align="center" {...others}>
+      <img
+        src="/logo-no-background.png"
+        alt="design sparx logo"
+        height={imgSize?.h || 48}
+        width={imgSize?.w || (collapsed ? imgSize?.h || 48 : undefined)} // Set width when collapsed
+      />
+      {!collapsed && ( // Only show text when not collapsed
         <Typography.Title
           level={5}
           type="secondary"
@@ -46,30 +46,33 @@ export const Logo = ({
             borderRadius,
           }}
         >
-          Antd Admin
+          Drawer Admin
         </Typography.Title>
-      </Flex>
-    </Link>
+      )}
+    </Flex>
   ) : (
     <Flex gap={others.gap || 'small'} align="center" {...others}>
       <img
         src="/logo-no-background.png"
         alt="design sparx logo"
         height={imgSize?.h || 48}
+        width={imgSize?.w || (collapsed ? imgSize?.h || 48 : undefined)} // Set width when collapsed
       />
-      <Typography.Title
-        level={4}
-        type="secondary"
-        style={{
-          color,
-          margin: 0,
-          padding: `4px 8px`,
-          backgroundColor: bgColor,
-          borderRadius,
-        }}
-      >
-        Antd Admin
-      </Typography.Title>
+      {!collapsed && ( // Only show text when not collapsed
+        <Typography.Title
+          level={4}
+          type="secondary"
+          style={{
+            color,
+            margin: 0,
+            padding: `4px 8px`,
+            backgroundColor: bgColor,
+            borderRadius,
+          }}
+        >
+          Antd Admin
+        </Typography.Title>
+      )}
     </Flex>
   );
 };

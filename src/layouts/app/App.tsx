@@ -95,13 +95,15 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   }, [isMobile]);
 
   useEffect(() => {
-    window.addEventListener('scroll', () => {
+    const handleScroll = () => {
       if (window.scrollY > 5) {
         setNavFill(true);
       } else {
         setNavFill(false);
       }
-    });
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
@@ -110,7 +112,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       <Layout
         style={{
           minHeight: '100vh',
-          backgroundColor: 'white',
+          backgroundColor: '#f5f5f5',
         }}
       >
         <SideNav
@@ -118,37 +120,42 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           collapsible
           collapsed={collapsed}
           onCollapse={(value) => setCollapsed(value)}
+          width={200}
+          collapsedWidth={isMobile ? 0 : 80}
           style={{
             overflow: 'auto',
+            height: '100vh',
             position: 'fixed',
             left: 0,
             top: 0,
             bottom: 0,
-            background: 'none',
-            border: 'none',
-            transition: 'all .2s',
+            zIndex: 10,
+            borderRight: '1px solid #e8e8e8',
+            backgroundColor: '#fff',
           }}
         />
         <Layout
           style={{
-            background: 'none',
+            marginLeft: collapsed ? (isMobile ? 0 : 80) : 200,
+            transition: 'all 0.2s',
+            backgroundColor: '#f5f5f5',
           }}
         >
           <HeaderNav
             style={{
-              marginLeft: collapsed ? 0 : '200px',
               padding: '0 2rem 0 0',
-              background: navFill ? 'rgba(255, 255, 255, .5)' : 'none',
+              background: navFill ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
               backdropFilter: navFill ? 'blur(8px)' : 'none',
-              boxShadow: navFill ? '0 0 8px 2px rgba(0, 0, 0, 0.05)' : 'none',
+              boxShadow: navFill ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               position: 'sticky',
               top: 0,
-              zIndex: 1,
+              zIndex: 9,
               gap: 8,
-              transition: 'all .25s',
+              transition: 'all 0.2s',
+              backgroundColor: '#fff',
             }}
           >
             <Flex align="center">
@@ -169,7 +176,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               <Input.Search
                 placeholder="search"
                 style={{
-                  width: isMobile ? '100%' : '400px',
+                  width: isMobile ? '100%' : 400,
                   marginLeft: isMobile ? 0 : '.5rem',
                 }}
                 size="middle"
@@ -197,12 +204,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           </HeaderNav>
           <Content
             style={{
-              margin: `0 0 0 ${collapsed ? 0 : '200px'}`,
-              background: '#ebedf0',
-              borderRadius: collapsed ? 0 : borderRadius,
-              transition: 'all .25s',
-              padding: '24px 32px',
-              minHeight: 360,
+              padding: '24px',
+              minHeight: 'calc(100vh - 64px - 70px)',
+              backgroundColor: 'transparent',
             }}
           >
             <TransitionGroup>
@@ -210,18 +214,23 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                 <CSSTransition
                   key={`css-transition-${location.key}`}
                   nodeRef={nodeRef}
-                  onEnter={() => {
-                    setIsLoading(true);
-                  }}
-                  onEntered={() => {
-                    setIsLoading(false);
-                  }}
+                  onEnter={() => setIsLoading(true)}
+                  onEntered={() => setIsLoading(false)}
                   timeout={300}
                   classNames="bottom-to-top"
                   unmountOnExit
                 >
                   {() => (
-                    <div ref={nodeRef} style={{ background: 'none' }}>
+                    <div
+                      ref={nodeRef}
+                      style={{
+                        // backgroundColor: '#fff',
+                        // borderRadius: borderRadius,
+                        padding: 24,
+                        minHeight: '100%',
+                        // boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                      }}
+                    >
                       {children}
                     </div>
                   )}
@@ -235,8 +244,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           <FooterNav
             style={{
               textAlign: 'center',
-              marginLeft: collapsed ? 0 : '200px',
-              background: 'none',
+              padding: '16px 0',
+              backgroundColor: '#fff',
+              borderTop: '1px solid #e8e8e8',
             }}
           />
         </Layout>

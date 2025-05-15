@@ -40,7 +40,7 @@ type Props = {
   error?: ReactNode;
 } & CardProps;
 
-export const RoleCard = ({
+export const RulesCard = ({
   data: propData,
   loading,
   error,

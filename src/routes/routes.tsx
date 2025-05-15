@@ -13,11 +13,11 @@ import {
   SignInPage,
   SignUpPage,
   SitemapPage,
-  SocialDashboardPage,
+  LogsListDashboardPage,
   UserProfileDetailsPage,
   VerifyEmailPage,
   WelcomePage,
-  LogisticsDashboardPage,
+  DevicesDashboardPage,
 } from '../pages';
 import { DashboardLayout, UserAccountLayout } from '../layouts';
 import React, { ReactNode, useEffect } from 'react';
@@ -77,12 +77,12 @@ const router = createBrowserRouter([
 
       {
         path: 'social',
-        element: <SocialDashboardPage />,
+        element: <LogsListDashboardPage />,
       },
 
       {
         path: 'logistics',
-        element: <LogisticsDashboardPage />,
+        element: <DevicesDashboardPage />,
       },
     ],
   },

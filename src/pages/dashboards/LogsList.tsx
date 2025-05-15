@@ -4,11 +4,11 @@ import { DASHBOARD_ITEMS } from '../../constants';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
-export const SocialDashboardPage = () => {
+export const LogsListDashboardPage = () => {
   return (
     <div>
       <Helmet>
-        <title>Social Dashboard</title>
+        <title>Logs Dashboard</title>
       </Helmet>
       <PageHeader
         title="Logs Dashboard"

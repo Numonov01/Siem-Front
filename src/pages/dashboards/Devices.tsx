@@ -1,7 +1,11 @@
 import { Button, Col, Input, Row } from 'antd';
 import { ApplicationListTable, Card, PageHeader } from '../../components';
 import { useEffect, useState } from 'react';
-import { HomeOutlined, PieChartOutlined } from '@ant-design/icons';
+import {
+  HomeOutlined,
+  PieChartOutlined,
+  StepBackwardOutlined,
+} from '@ant-design/icons';
 import { DASHBOARD_ITEMS } from '../../constants';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -24,7 +28,7 @@ const DEVICE_TABS = [
   },
 ];
 
-export const LogisticsDashboardPage = () => {
+export const DevicesDashboardPage = () => {
   const [activeTabKey, setActiveTabKey] = useState<string>('all');
   const [deviceData, setDeviceData] = useState<DeviceListData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -118,18 +122,16 @@ export const LogisticsDashboardPage = () => {
         ]}
       />
       <Row>
-        {selectedDeviceId && (
-          <Button
-            type="primary"
-            onClick={handleBackToDevices}
-            style={{ marginBottom: 16 }}
-          >
-            Back to Devices
-          </Button>
-        )}
         <Col span={24}>
           {selectedDeviceId ? (
-            <Card title="Applications List">
+            <Card
+              title="Applications List"
+              extra={
+                <Button type="primary" onClick={handleBackToDevices}>
+                  <StepBackwardOutlined /> Back to Devices
+                </Button>
+              }
+            >
               <ApplicationListTable deviceId={selectedDeviceId} />
             </Card>
           ) : (

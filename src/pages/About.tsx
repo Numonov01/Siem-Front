@@ -1,9 +1,8 @@
-import { Card, Flex } from 'antd';
+import { Flex } from 'antd';
 import { HomeOutlined, PieChartOutlined } from '@ant-design/icons';
 import { PageHeader } from '../components';
 import { DASHBOARD_ITEMS } from '../constants';
 import { Link } from 'react-router-dom';
-import { ApplicationListTable } from '../components/dashboard/projects/ClientsTable/ClientsTable';
 
 export const AboutPage = () => {
   return (
@@ -40,10 +39,7 @@ export const AboutPage = () => {
             },
           ]}
         />
-
-        <Card title="Application List">
-          <ApplicationListTable deviceId={1} />
-        </Card>
+        hi
       </Flex>
     </div>
   );

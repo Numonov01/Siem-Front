@@ -1,7 +1,10 @@
 // ClientsTable.tsx
-import { Table, TableProps } from 'antd';
+import { Button, Space, Table, TableProps, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { fetchDeviceAppsList } from '../../../../service/device_list';
+import { Device } from '../../../../types/device_list';
+
+const { Text } = Typography;
 
 const COLUMNS = [
   {
@@ -14,6 +17,22 @@ const COLUMNS = [
     dataIndex: 'title',
     key: 'title',
   },
+  {
+    title: 'Actions',
+    key: 'actions',
+    render: (record: Device) => (
+      <Space size="small" direction="horizontal">
+        <Button
+          size="small"
+          onClick={() => {
+            console.log('Detailes clicked:', record.id);
+          }}
+        >
+          <Text>View deailes</Text>
+        </Button>
+      </Space>
+    ),
+  },
 ];
 
 type Application = {
@@ -22,7 +41,7 @@ type Application = {
 };
 
 type Props = {
-  deviceId: number; // Add deviceId as a prop
+  deviceId: number;
 } & TableProps<Application>;
 
 export const ApplicationListTable = ({ deviceId, ...others }: Props) => {
@@ -34,12 +53,11 @@ export const ApplicationListTable = ({ deviceId, ...others }: Props) => {
       try {
         setLoading(true);
         if (deviceId) {
-          // Only fetch if deviceId is provided
-          const device = await fetchDeviceAppsList(deviceId); // Use the prop
+          const device = await fetchDeviceAppsList(deviceId);
           console.log('Device apps data:', device);
           setApplications(device.applications || []);
         } else {
-          setApplications([]); // Clear data if no deviceId
+          setApplications([]);
         }
       } catch (err) {
         console.error('Failed to fetch device data:', err);
@@ -49,7 +67,7 @@ export const ApplicationListTable = ({ deviceId, ...others }: Props) => {
     };
 
     getData();
-  }, [deviceId]); // Add deviceId to dependency array
+  }, [deviceId]);
 
   return (
     <Table

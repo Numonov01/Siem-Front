@@ -1,3 +1,3 @@
 export { DefaultDashboardPage } from './Default.tsx';
-export { SocialDashboardPage } from './Social.tsx';
-export { LogisticsDashboardPage } from './Logistics.tsx';
+export { LogsListDashboardPage } from './LogsList.tsx';
+export { DevicesDashboardPage } from './Devices.tsx';

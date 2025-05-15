@@ -41,7 +41,7 @@ const items: MenuProps['items'] = [
   getItem('Dashboards', 'dashboards', <PieChartOutlined />, [
     getItem(<Link to={PATH_DASHBOARD.default}>Default</Link>, 'default', null),
 
-    getItem(<Link to={PATH_DASHBOARD.social}>Social</Link>, 'social', null),
+    getItem(<Link to={PATH_DASHBOARD.social}>Logs list</Link>, 'social', null),
 
     getItem(
       <Link to={PATH_DASHBOARD.logistics}>Logistics</Link>,
@@ -55,7 +55,7 @@ const items: MenuProps['items'] = [
     <InfoCircleOutlined />
   ),
   getItem(
-    <Link to={PATH_SITEMAP.root}>Sitemap</Link>,
+    <Link to={PATH_SITEMAP.root}>Rules</Link>,
     'sitemap',
     <BranchesOutlined />
   ),

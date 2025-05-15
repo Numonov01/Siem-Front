@@ -185,7 +185,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               <Dropdown menu={{ items }} trigger={['click']}>
                 <Flex>
                   <img
-                    src="/me.jpg"
+                    src="/jujutsu.jpg"
                     alt="user profile photo"
                     height={36}
                     width={36}

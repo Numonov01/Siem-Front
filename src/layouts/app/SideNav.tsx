@@ -44,7 +44,7 @@ const items: MenuProps['items'] = [
     getItem(<Link to={PATH_DASHBOARD.social}>Logs list</Link>, 'social', null),
 
     getItem(
-      <Link to={PATH_DASHBOARD.logistics}>Logistics</Link>,
+      <Link to={PATH_DASHBOARD.logistics}>Agents</Link>,
       'logistics',
       null
     ),

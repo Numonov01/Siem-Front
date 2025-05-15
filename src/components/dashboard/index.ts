@@ -42,7 +42,7 @@ export {
 } from './bidding';
 export {
   StatsCard as LearningStatsCard,
-  RoleCard,
+  RulesCard,
   CoursesCarousel,
   StudyStatisticsCard,
   ProgressCard,

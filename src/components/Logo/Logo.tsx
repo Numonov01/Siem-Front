@@ -11,7 +11,7 @@ type LogoProps = {
   asLink?: boolean;
   href?: string;
   bgColor?: CSSProperties['backgroundColor'];
-  collapsed?: boolean; // Add collapsed prop
+  collapsed?: boolean;
 } & Partial<FlexProps>;
 
 export const Logo = ({
@@ -32,9 +32,9 @@ export const Logo = ({
         src="/logo-no-background.png"
         alt="design sparx logo"
         height={imgSize?.h || 48}
-        width={imgSize?.w || (collapsed ? imgSize?.h || 48 : undefined)} // Set width when collapsed
+        width={imgSize?.w || (collapsed ? imgSize?.h || 48 : undefined)}
       />
-      {!collapsed && ( // Only show text when not collapsed
+      {!collapsed && (
         <Typography.Title
           level={5}
           type="secondary"
@@ -56,9 +56,9 @@ export const Logo = ({
         src="/logo-no-background.png"
         alt="design sparx logo"
         height={imgSize?.h || 48}
-        width={imgSize?.w || (collapsed ? imgSize?.h || 48 : undefined)} // Set width when collapsed
+        width={imgSize?.w || (collapsed ? imgSize?.h || 48 : undefined)}
       />
-      {!collapsed && ( // Only show text when not collapsed
+      {!collapsed && (
         <Typography.Title
           level={4}
           type="secondary"

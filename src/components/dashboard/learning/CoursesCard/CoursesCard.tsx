@@ -1,4 +1,13 @@
-import { Alert, Button, CardProps, Space, Table, Tag, TagProps } from 'antd';
+import {
+  Alert,
+  Button,
+  CardProps,
+  Space,
+  Table,
+  Tag,
+  TagProps,
+  Modal,
+} from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Card } from '../../../index.ts';
 import { ReactNode, useEffect, useState } from 'react';
@@ -21,18 +30,33 @@ export const RulesCard = ({
   const [localData, setLocalData] = useState<UserRuleData[]>([]);
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState<ReactNode>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Delete handler
   const handleDelete = async (id: number) => {
+    setDeleteLoading(true);
     try {
       await deleteRule(id);
       setLocalData((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error('Failed to delete rule:', error);
+    } finally {
+      setDeleteLoading(false);
+      setDeleteConfirm(null);
     }
   };
 
-  // Columns including delete action
+  const showDeleteConfirm = (id: number) => {
+    Modal.confirm({
+      title: 'Are you sure you want to delete this rule?',
+      content: 'This action cannot be undone',
+      okText: 'Yes, delete it',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: () => handleDelete(id),
+    });
+  };
+
   const columns: ColumnsType<UserRuleData> = [
     {
       title: 'Name',
@@ -78,9 +102,10 @@ export const RulesCard = ({
           />
           <Button
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.id)}
+            onClick={() => showDeleteConfirm(record.id)}
             danger
             size="small"
+            loading={deleteConfirm === record.id && deleteLoading}
           />
         </Space>
       ),

@@ -17,7 +17,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    data: ClientsData.slice(0, 10),
+    dataSource: ClientsData.slice(0, 10).map((client: any) => ({
+      ...client,
+      id: client.client_id,
+      title: `${client.title} ${client.title}`,
+    })),
     style: { width: 600 },
   },
 };

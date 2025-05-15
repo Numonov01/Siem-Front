@@ -12,7 +12,11 @@ export {
 } from './default';
 export { RevenueCard, PostsCard, ProjectsCard } from './shared';
 export { CustomerReviewsCard } from './ecommerce';
-export { ProjectsCountCard, DeviceListTable, ClientsTable } from './projects';
+export {
+  ProjectsCountCard,
+  DeviceListTable,
+  ApplicationListTable,
+} from './projects';
 export {
   StatsCard as MarketingStatsCard,
   VisitorsChartCard,

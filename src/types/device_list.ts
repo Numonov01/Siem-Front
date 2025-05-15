@@ -9,11 +9,6 @@ export interface DeviceListData {
   ip_address: string;
 }
 
-export interface Application {
-  id: number;
-  title: string;
-}
-
 export interface Device {
   id: number;
   name: string;
@@ -23,5 +18,8 @@ export interface Device {
   ip_address: string;
   user: string;
   mac_address: string;
-  applications: Application[];
+  applications: {
+    id: number;
+    title: string;
+  }[];
 }

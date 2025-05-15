@@ -1,35 +1,65 @@
-import { Table, TableProps, Typography } from 'antd';
-import { Clients } from '../../../../types';
-import { UserAvatar } from '../../../index.ts';
+// ClientsTable.tsx
+import { Table, TableProps } from 'antd';
+import { useEffect, useState } from 'react';
+import { fetchDeviceAppsList } from '../../../../service/device_list';
 
 const COLUMNS = [
   {
-    title: 'Client Name',
-    dataIndex: 'client_name',
-    key: 'c_name',
-    render: (_: any, { first_name, last_name }: Clients) => (
-      <UserAvatar fullName={`${first_name} ${last_name}`} />
-    ),
+    title: 'Id',
+    dataIndex: 'id',
+    key: 'id',
   },
   {
-    title: 'Amount',
-    dataIndex: 'total_price',
-    key: 'client_amount',
-    render: (_: any) => <Typography.Text>${_}</Typography.Text>,
+    title: 'Title',
+    dataIndex: 'title',
+    key: 'title',
   },
 ];
 
-type Props = {
-  data: Clients[];
-} & TableProps<any>;
+type Application = {
+  id: number;
+  title: string;
+};
 
-export const ClientsTable = ({ data, ...others }: Props) => (
-  <Table
-    dataSource={data}
-    columns={COLUMNS}
-    key="client_table"
-    size="middle"
-    className="overflow-scroll"
-    {...others}
-  />
-);
+type Props = {
+  deviceId: number; // Add deviceId as a prop
+} & TableProps<Application>;
+
+export const ApplicationListTable = ({ deviceId, ...others }: Props) => {
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        setLoading(true);
+        if (deviceId) {
+          // Only fetch if deviceId is provided
+          const device = await fetchDeviceAppsList(deviceId); // Use the prop
+          console.log('Device apps data:', device);
+          setApplications(device.applications || []);
+        } else {
+          setApplications([]); // Clear data if no deviceId
+        }
+      } catch (err) {
+        console.error('Failed to fetch device data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getData();
+  }, [deviceId]); // Add deviceId to dependency array
+
+  return (
+    <Table
+      dataSource={applications}
+      columns={COLUMNS}
+      rowKey="id"
+      size="middle"
+      className="overflow-scroll"
+      loading={loading}
+      {...others}
+    />
+  );
+};

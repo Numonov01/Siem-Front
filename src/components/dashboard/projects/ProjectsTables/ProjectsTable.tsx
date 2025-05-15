@@ -11,7 +11,7 @@ import { DeviceListData } from '../../../../types/device_list';
 
 const { Text } = Typography;
 
-const COLUMNS = [
+const COLUMNS = (onAppListClick: (deviceId: number) => void) => [
   {
     title: 'Name',
     dataIndex: 'name',
@@ -70,14 +70,9 @@ const COLUMNS = [
   {
     title: 'Actions',
     key: 'actions',
-    render: () => (
+    render: (_: unknown, record: DeviceListData) => (
       <Space size="small" direction="horizontal">
-        <Button
-          size="small"
-          onClick={() => {
-            console.log('App List clicked:');
-          }}
-        >
+        <Button size="small" onClick={() => onAppListClick(record.pk)}>
           <Text>App List</Text>
         </Button>
         <Button
@@ -96,13 +91,19 @@ const COLUMNS = [
 type Props = {
   data: DeviceListData[];
   loading?: boolean;
+  onAppListClick: (deviceId: number) => void;
 } & TableProps<DeviceListData>;
 
-export const DeviceListTable = ({ data, loading, ...others }: Props) => {
+export const DeviceListTable = ({
+  data,
+  loading,
+  onAppListClick,
+  ...others
+}: Props) => {
   return (
     <Table
       dataSource={data}
-      columns={COLUMNS}
+      columns={COLUMNS(onAppListClick)}
       className="overflow-scroll"
       loading={loading}
       rowKey="pk"

@@ -1,13 +1,11 @@
-import { Col, Flex, Row } from 'antd';
-import { useStylesContext } from '../context';
+import { Card, Flex } from 'antd';
 import { HomeOutlined, PieChartOutlined } from '@ant-design/icons';
 import { PageHeader } from '../components';
 import { DASHBOARD_ITEMS } from '../constants';
 import { Link } from 'react-router-dom';
+import { ApplicationListTable } from '../components/dashboard/projects/ClientsTable/ClientsTable';
 
 export const AboutPage = () => {
-  const stylesContext = useStylesContext();
-
   return (
     <div>
       <Flex vertical gap="middle">
@@ -43,11 +41,9 @@ export const AboutPage = () => {
           ]}
         />
 
-        <Row {...stylesContext?.rowProps}>
-          <Col xs={24} lg={18}>
-            About page
-          </Col>
-        </Row>
+        <Card title="Application List">
+          <ApplicationListTable deviceId={1} />
+        </Card>
       </Flex>
     </div>
   );

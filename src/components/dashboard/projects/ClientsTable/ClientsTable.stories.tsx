@@ -1,15 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import ClientsData from '../../../../../public/mocks/Clients.json';
 
-import { ClientsTable } from './ClientsTable.tsx';
+import { ApplicationListTable } from './ClientsTable.tsx';
 
 const meta = {
   title: 'Components/Dashboard/Projects/Clients',
-  component: ClientsTable,
+  component: ApplicationListTable,
   parameters: {
     layout: 'centered',
   },
-} satisfies Meta<typeof ClientsTable>;
+} satisfies Meta<typeof ApplicationListTable>;
 
 export default meta;
 
@@ -17,11 +16,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    dataSource: ClientsData.slice(0, 10).map((client: any) => ({
-      ...client,
-      id: client.client_id,
-      title: `${client.title} ${client.title}`,
-    })),
+    deviceId: 1,
     style: { width: 600 },
   },
 };

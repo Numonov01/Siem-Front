@@ -15,29 +15,6 @@ import { fetchEventLogs } from '../../../../service/event_logs.ts';
 import { DownOutlined, UpOutlined } from '@ant-design/icons';
 import { EventData } from '../../../../types/event_logs.ts';
 
-// export interface EventData {
-//   id: number;
-//   event_id: string;
-//   utc_time: string;
-//   process_guid: string;
-//   process_id: number;
-//   user: string;
-//   creation_utc_time: string;
-//   protocol: string;
-//   initiated: boolean;
-//   source_is_ipv6: boolean;
-//   source_ip: string;
-//   source_hostname: string;
-//   source_port: number;
-//   source_port_name: string;
-//   destination_is_ipv6: boolean;
-//   destination_ip: string;
-//   destination_hostname: string;
-//   destination_port: number;
-//   destination_port_name: string;
-//   is_passed_sigma_rules: boolean;
-// }
-
 type TabKeys = 'all' | 'in transit' | string;
 
 const TAB_LIST = [
@@ -208,7 +185,7 @@ const DeliveryTable = ({ data, loading, ...others }: DeliveryTableProps) => {
         rowKey="id"
         dataSource={data || []}
         columns={BASIC_COLUMNS}
-        pagination={{ pageSize: 10 }}
+        // pagination={{ pageSize: 10 }}
         loading={loading}
         expandable={{
           expandedRowRender: (record) => (

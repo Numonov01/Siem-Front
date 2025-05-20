@@ -99,7 +99,11 @@ export const RulesCard = ({
       formData.append('is_active', values.is_active);
 
       if (editingRule) {
-        const updatedRule = await updateRule(editingRule.id, formData);
+        const updatePayload: Partial<UserRuleData> = {
+          name: values.name,
+          is_active: values.is_active,
+        };
+        const updatedRule = await updateRule(editingRule.id, updatePayload);
         setLocalData((prev) =>
           prev.map((item) => (item.id === updatedRule.id ? updatedRule : item))
         );

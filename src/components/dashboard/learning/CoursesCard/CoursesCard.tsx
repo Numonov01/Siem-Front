@@ -21,6 +21,7 @@ import {
   fetchRule,
   deleteRule,
   createRule,
+  updateRule,
 } from '../../../../service/rules.ts';
 import {
   DeleteOutlined,
@@ -48,10 +49,11 @@ export const RulesCard = ({
   const [localError, setLocalError] = useState<ReactNode>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [editingRule, setEditingRule] = useState<UserRuleData | null>(null);
 
   const handleDelete = async (id: number) => {
     setDeleteLoading(true);
@@ -79,27 +81,37 @@ export const RulesCard = ({
     });
   };
 
-  const handleCreate = async () => {
+  const handleCreateOrUpdate = async () => {
     try {
       const values = await form.validateFields();
       setUploading(true);
 
-      const ruleData = new FormData();
+      const formData = new FormData();
       if (fileList.length > 0) {
-        ruleData.append('file', fileList[0].originFileObj as RcFile);
+        formData.append('file', fileList[0].originFileObj as RcFile);
       }
-      ruleData.append('name', values.name);
-      ruleData.append('is_active', values.is_active);
+      formData.append('name', values.name);
+      formData.append('is_active', values.is_active);
 
-      const newRule = await createRule(ruleData);
-      setLocalData((prev) => [...prev, newRule]);
-      message.success('Rule created successfully');
-      setCreateModalVisible(false);
+      if (editingRule) {
+        const updatedRule = await updateRule(editingRule.id, formData);
+        setLocalData((prev) =>
+          prev.map((item) => (item.id === updatedRule.id ? updatedRule : item))
+        );
+        message.success('Rule updated successfully');
+      } else {
+        const newRule = await createRule(formData);
+        setLocalData((prev) => [...prev, newRule]);
+        message.success('Rule created successfully');
+      }
+
+      setModalVisible(false);
       form.resetFields();
       setFileList([]);
+      setEditingRule(null);
     } catch (error) {
-      console.error('Failed to create rule:', error);
-      message.error('Failed to create rule');
+      console.error('Failed to submit rule:', error);
+      message.error('Failed to submit rule');
     } finally {
       setUploading(false);
     }
@@ -118,6 +130,16 @@ export const RulesCard = ({
     setFileList(fileList);
   };
 
+  const handleEdit = (record: UserRuleData) => {
+    setEditingRule(record);
+    form.setFieldsValue({
+      name: record.name,
+      is_active: record.is_active,
+    });
+    setFileList([]);
+    setModalVisible(true);
+  };
+
   const columns: ColumnsType<UserRuleData> = [
     {
       title: 'File',
@@ -133,7 +155,7 @@ export const RulesCard = ({
         ),
     },
     {
-      title: 'Text area',
+      title: 'Description',
       dataIndex: 'name',
       key: 'name',
       render: (text: string) => <span className="text-capitalize">{text}</span>,
@@ -143,7 +165,7 @@ export const RulesCard = ({
       dataIndex: 'is_active',
       key: 'is_active',
       render: (isActive: boolean) => {
-        const status = isActive ? 'active' : 'inactive';
+        const status = isActive ? 'Active' : 'Inactive';
         const color: TagProps['color'] = isActive ? 'green' : 'red';
         return (
           <Tag color={color} className="text-capitalize">
@@ -159,9 +181,7 @@ export const RulesCard = ({
         <Space size="small">
           <Button
             icon={<EditOutlined />}
-            onClick={() => {
-              console.log('Edit clicked');
-            }}
+            onClick={() => handleEdit(record)}
             size="small"
           />
           <Button
@@ -201,8 +221,14 @@ export const RulesCard = ({
       extra={
         <Button
           type="primary"
-          onClick={() => setCreateModalVisible(true)}
+          onClick={() => {
+            setEditingRule(null);
+            form.resetFields();
+            setFileList([]);
+            setModalVisible(true);
+          }}
           icon={<PlusOutlined />}
+          disabled={uploading}
         >
           Create
         </Button>
@@ -223,28 +249,37 @@ export const RulesCard = ({
           loading={displayLoading}
           className="overflow-scroll"
           rowKey="id"
+          locale={{ emptyText: 'No rules available' }}
         />
       )}
 
-      {/* Create Rule Modal */}
+      {/* Create/Edit Rule Modal */}
       <Modal
-        title="Create New Rule"
-        open={createModalVisible}
-        onOk={handleCreate}
+        title={editingRule ? 'Edit Rule' : 'Create New Rule'}
+        open={modalVisible}
+        onOk={handleCreateOrUpdate}
         confirmLoading={uploading}
         onCancel={() => {
-          setCreateModalVisible(false);
+          setModalVisible(false);
           form.resetFields();
           setFileList([]);
+          setEditingRule(null);
         }}
-        okText="Create"
+        okText={editingRule ? 'Update' : 'Create'}
         cancelText="Cancel"
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="file"
             label="File"
-            rules={[{ required: true, message: 'Please upload a file' }]}
+            rules={[
+              {
+                validator: () =>
+                  fileList.length > 0
+                    ? Promise.resolve()
+                    : Promise.reject(new Error('Please upload a file')),
+              },
+            ]}
           >
             <Upload
               beforeUpload={beforeUpload}

@@ -5,6 +5,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
+// Optional: Add token if needed
 // api.interceptors.request.use((config) => {
 //   const token = localStorage.getItem('token');
 //   if (token) {
@@ -23,11 +24,14 @@ export const fetchRule = async (): Promise<UserRuleData[]> => {
   }
 };
 
-export const createRule = async (
-  ruleData: Omit<UserRuleData, 'id'>
-): Promise<UserRuleData> => {
+// Accept FormData for file upload
+export const createRule = async (ruleData: FormData): Promise<UserRuleData> => {
   try {
-    const response = await api.post('/agent/sigma-rules/', ruleData);
+    const response = await api.post('/agent/sigma-rules/', ruleData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Error creating rule:', error);
@@ -57,6 +61,7 @@ export const deleteRule = async (id: number): Promise<void> => {
   }
 };
 
+// Optional: Fetch single rule
 // export const getRuleById = async (id: number): Promise<UserRuleData> => {
 //   try {
 //     const response = await api.get(`/agent/sigma-rules/${id}/`);

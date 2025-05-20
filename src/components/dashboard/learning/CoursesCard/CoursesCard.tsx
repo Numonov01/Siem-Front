@@ -55,8 +55,10 @@ export const RulesCard = ({
   const [uploading, setUploading] = useState(false);
   const [editingRule, setEditingRule] = useState<UserRuleData | null>(null);
 
+  // Delete rule handler
   const handleDelete = async (id: number) => {
     setDeleteLoading(true);
+    setDeleteConfirm(id);
     try {
       await deleteRule(id);
       setLocalData((prev) => prev.filter((item) => item.id !== id));
@@ -70,6 +72,7 @@ export const RulesCard = ({
     }
   };
 
+  // Confirmation modal before deleting
   const showDeleteConfirm = (id: number) => {
     Modal.confirm({
       title: 'Are you sure you want to delete this rule?',
@@ -81,6 +84,7 @@ export const RulesCard = ({
     });
   };
 
+  // Create or Update handler
   const handleCreateOrUpdate = async () => {
     try {
       const values = await form.validateFields();
@@ -90,6 +94,7 @@ export const RulesCard = ({
       if (fileList.length > 0) {
         formData.append('file', fileList[0].originFileObj as RcFile);
       }
+
       formData.append('name', values.name);
       formData.append('is_active', values.is_active);
 
@@ -117,13 +122,14 @@ export const RulesCard = ({
     }
   };
 
+  // Validate upload file
   const beforeUpload = (file: RcFile) => {
     const isLt5M = file.size / 1024 / 1024 < 5;
     if (!isLt5M) {
       message.error('File must be smaller than 5MB!');
       return false;
     }
-    return true;
+    return false; // prevent default upload
   };
 
   const handleFileChange = ({ fileList }: { fileList: UploadFile[] }) => {
@@ -247,13 +253,11 @@ export const RulesCard = ({
           dataSource={displayData}
           columns={columns}
           loading={displayLoading}
-          className="overflow-scroll"
           rowKey="id"
           locale={{ emptyText: 'No rules available' }}
         />
       )}
 
-      {/* Create/Edit Rule Modal */}
       <Modal
         title={editingRule ? 'Edit Rule' : 'Create New Rule'}
         open={modalVisible}
@@ -275,7 +279,7 @@ export const RulesCard = ({
             rules={[
               {
                 validator: () =>
-                  fileList.length > 0
+                  editingRule || fileList.length > 0
                     ? Promise.resolve()
                     : Promise.reject(new Error('Please upload a file')),
               },
@@ -286,6 +290,8 @@ export const RulesCard = ({
               onChange={handleFileChange}
               fileList={fileList}
               maxCount={1}
+              multiple={false}
+              listType="text"
             >
               <Button icon={<UploadOutlined />}>Click to Upload</Button>
             </Upload>
@@ -305,11 +311,7 @@ export const RulesCard = ({
             valuePropName="checked"
             initialValue={true}
           >
-            <Switch
-              checkedChildren="Active"
-              unCheckedChildren="Inactive"
-              defaultChecked
-            />
+            <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
           </Form.Item>
         </Form>
       </Modal>

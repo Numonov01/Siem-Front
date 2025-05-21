@@ -1,10 +1,27 @@
-import { Flex } from 'antd';
-import { HomeOutlined, PieChartOutlined } from '@ant-design/icons';
+import { Flex, Card } from 'antd';
 import { PageHeader } from '../components';
-import { DASHBOARD_ITEMS } from '../constants';
-import { Link } from 'react-router-dom';
+import { HomeOutlined, PieChartOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import { fetchProcessList } from '../service/process_list';
+import { ProcessListData } from '../types/process_list';
+import { ProcessTableTree } from '../components/dashboard/projects/ProjectsTables/ProcessTreeView';
 
 export const AboutPage = () => {
+  const [processes, setProcesses] = useState<ProcessListData[]>([]);
+
+  useEffect(() => {
+    // Demo uchun deviceId ni 2 deb olaylik
+    const fetchProcesses = async () => {
+      try {
+        const res = await fetchProcessList('2');
+        setProcesses(res);
+      } catch (err) {
+        console.error('Failed to load processes', err);
+      }
+    };
+    fetchProcesses();
+  }, []);
+
   return (
     <div>
       <Flex vertical gap="middle">
@@ -27,19 +44,17 @@ export const AboutPage = () => {
                   <span>dashboards</span>
                 </>
               ),
-              menu: {
-                items: DASHBOARD_ITEMS.map((d) => ({
-                  key: d.title,
-                  title: <Link to={d.path}>{d.title}</Link>,
-                })),
-              },
+              path: '/dashboards',
             },
             {
               title: 'about',
             },
           ]}
         />
-        hi
+
+        <Card title="Process Tree">
+          <ProcessTableTree processes={processes} />
+        </Card>
       </Flex>
     </div>
   );

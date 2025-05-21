@@ -6,7 +6,6 @@ import {
   LaptopOutlined,
   OrderedListOutlined,
   PieChartOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import { Logo } from '../../components';
 import { Link, useLocation } from 'react-router-dom';
@@ -15,7 +14,6 @@ import {
   PATH_DASHBOARD,
   PATH_LANDING,
   PATH_SITEMAP,
-  PATH_USER_PROFILE,
 } from '../../constants';
 import { COLOR } from '../../App.tsx';
 
@@ -71,16 +69,16 @@ const items: MenuProps['items'] = [
     <BranchesOutlined />
   ),
 
-  getItem('Pages', 'pages', null, [], 'group'),
+  // getItem('Pages', 'pages', null, [], 'group'),
 
-  getItem('User profile', 'user-profile', <UserOutlined />, [
-    getItem(
-      <Link to={PATH_USER_PROFILE.details}>Details</Link>,
-      'details',
-      null
-    ),
-    getItem(<Link to={PATH_USER_PROFILE.edit}>Edit</Link>, 'edit', null),
-  ]),
+  // getItem('User profile', 'user-profile', <UserOutlined />, [
+  //   getItem(
+  //     <Link to={PATH_USER_PROFILE.details}>Details</Link>,
+  //     'details',
+  //     null
+  //   ),
+  //   getItem(<Link to={PATH_USER_PROFILE.edit}>Edit</Link>, 'edit', null),
+  // ]),
 ];
 
 const rootSubmenuKeys = ['dashboards', 'corporate', 'user-profile'];

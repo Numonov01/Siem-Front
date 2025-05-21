@@ -8,11 +8,13 @@ import {
   Typography,
 } from 'antd';
 import { DeviceListData } from '../../../../types/device_list';
-import { fetchProcessList } from '../../../../service/process_list';
 
 const { Text } = Typography;
 
-const COLUMNS = (onAppListClick: (deviceId: number) => void) => [
+const COLUMNS = (
+  onAppListClick: (deviceId: number) => void,
+  onTreeClick: (deviceId: number) => void
+) => [
   {
     title: 'Name',
     dataIndex: 'name',
@@ -84,15 +86,7 @@ const COLUMNS = (onAppListClick: (deviceId: number) => void) => [
         </Button>
         <Button
           size="small"
-          onClick={async () => {
-            console.log('Tree button clicked for device:', record.pk);
-            try {
-              const processes = await fetchProcessList(record.pk.toString());
-              console.log('Process list:', processes);
-            } catch (error) {
-              console.error('Error fetching process list:', error);
-            }
-          }}
+          onClick={() => onTreeClick(record.pk)} // Use the prop instead of direct fetch
         >
           <Text>Tree</Text>
         </Button>
@@ -105,18 +99,20 @@ type Props = {
   data: DeviceListData[];
   loading?: boolean;
   onAppListClick: (deviceId: number) => void;
+  onTreeClick: (deviceId: number) => void;
 } & TableProps<DeviceListData>;
 
 export const DeviceListTable = ({
   data,
   loading,
   onAppListClick,
+  onTreeClick,
   ...others
 }: Props) => {
   return (
     <Table
       dataSource={data}
-      columns={COLUMNS(onAppListClick)}
+      columns={COLUMNS(onAppListClick, onTreeClick)}
       className="overflow-scroll"
       loading={loading}
       rowKey="pk"

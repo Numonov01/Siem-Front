@@ -7,7 +7,7 @@ import {
   StepBackwardOutlined,
 } from '@ant-design/icons';
 import { DASHBOARD_ITEMS } from '../../constants';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { fetchDeviceList } from '../../service/device_list';
 import { DeviceListTable } from '../../components/dashboard/projects/ProjectsTables/ProjectsTable';
@@ -86,6 +86,11 @@ export const DevicesDashboardPage = () => {
 
   const handleBackToDevices = () => {
     setSelectedDeviceId(null);
+  };
+  const navigate = useNavigate();
+  const handleTreeClick = (deviceId: number) => {
+    navigate('/about', { state: { deviceId } });
+    // Or use context/state management if you prefer
   };
 
   return (
@@ -168,6 +173,7 @@ export const DevicesDashboardPage = () => {
                   data={getFilteredData()}
                   loading={loading}
                   onAppListClick={handleAppListClick}
+                  onTreeClick={handleTreeClick}
                   rowKey="pk"
                 />
               )}

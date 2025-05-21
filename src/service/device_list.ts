@@ -8,6 +8,7 @@ const api = axios.create({
 export const fetchDeviceList = async (): Promise<DeviceListData[]> => {
   try {
     const response = await api.get('/agent/device/list/');
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching device list:', error);
@@ -18,6 +19,7 @@ export const fetchDeviceList = async (): Promise<DeviceListData[]> => {
 export const fetchDeviceAppsList = async (pk: number): Promise<Device> => {
   try {
     const response = await api.get(`/agent/device/${pk}`);
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching device apps:', error);

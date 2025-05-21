@@ -55,7 +55,6 @@ export const RulesCard = ({
   const [uploading, setUploading] = useState(false);
   const [editingRule, setEditingRule] = useState<UserRuleData | null>(null);
 
-  // Delete rule handler
   const handleDelete = async (id: number) => {
     setDeleteLoading(true);
     setDeleteConfirm(id);
@@ -72,7 +71,6 @@ export const RulesCard = ({
     }
   };
 
-  // Confirmation modal before deleting
   const showDeleteConfirm = (id: number) => {
     Modal.confirm({
       title: 'Are you sure you want to delete this rule?',
@@ -84,7 +82,6 @@ export const RulesCard = ({
     });
   };
 
-  // Create or Update handler
   const handleCreateOrUpdate = async () => {
     try {
       const values = await form.validateFields();
@@ -126,14 +123,13 @@ export const RulesCard = ({
     }
   };
 
-  // Validate upload file
   const beforeUpload = (file: RcFile) => {
     const isLt5M = file.size / 1024 / 1024 < 5;
     if (!isLt5M) {
       message.error('File must be smaller than 5MB!');
       return false;
     }
-    return false; // prevent default upload
+    return false;
   };
 
   const handleFileChange = ({ fileList }: { fileList: UploadFile[] }) => {
@@ -145,6 +141,7 @@ export const RulesCard = ({
     form.setFieldsValue({
       name: record.name,
       is_active: record.is_active,
+      file: record.file,
     });
     setFileList([]);
     setModalVisible(true);

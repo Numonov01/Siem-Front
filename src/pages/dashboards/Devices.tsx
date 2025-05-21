@@ -1,6 +1,6 @@
-import { Button, Col, Input, Row } from 'antd';
+import { Alert, Button, Col, Input, Row } from 'antd';
 import { ApplicationListTable, Card, PageHeader } from '../../components';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
   HomeOutlined,
   PieChartOutlined,
@@ -34,6 +34,7 @@ export const DevicesDashboardPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [searchText, setSearchText] = useState('');
+  const [error, setError] = useState<ReactNode | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -41,8 +42,12 @@ export const DevicesDashboardPage = () => {
       try {
         const data = await fetchDeviceList();
         setDeviceData(data);
+        setError(null);
       } catch (error) {
         console.error('Fetch error:', error);
+        setError(
+          error instanceof Error ? error.message : 'Failed to load data'
+        );
       } finally {
         setLoading(false);
       }
@@ -151,11 +156,20 @@ export const DevicesDashboardPage = () => {
                 />
               }
             >
-              <DeviceListTable
-                data={getFilteredData()}
-                loading={loading}
-                onAppListClick={handleAppListClick}
-              />
+              {error ? (
+                <Alert
+                  message="Error"
+                  description={error.toString()}
+                  type="error"
+                  showIcon
+                />
+              ) : (
+                <DeviceListTable
+                  data={getFilteredData()}
+                  loading={loading}
+                  onAppListClick={handleAppListClick}
+                />
+              )}
             </Card>
           )}
         </Col>

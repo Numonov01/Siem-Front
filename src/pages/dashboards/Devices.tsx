@@ -168,6 +168,7 @@ export const DevicesDashboardPage = () => {
                   data={getFilteredData()}
                   loading={loading}
                   onAppListClick={handleAppListClick}
+                  rowKey="pk"
                 />
               )}
             </Card>

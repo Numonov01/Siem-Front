@@ -8,6 +8,7 @@ import {
   Typography,
 } from 'antd';
 import { DeviceListData } from '../../../../types/device_list';
+import { fetchProcessList } from '../../../../service/process_list';
 
 const { Text } = Typography;
 
@@ -77,11 +78,23 @@ const COLUMNS = (onAppListClick: (deviceId: number) => void) => [
         </Button>
         <Button
           size="small"
-          onClick={() => {
-            console.log('Device Logs clicked:');
-          }}
+          onClick={() => console.log('Device Logs clicked:', record.pk)}
         >
           <Text>Device Logs</Text>
+        </Button>
+        <Button
+          size="small"
+          onClick={async () => {
+            console.log('Tree button clicked for device:', record.pk);
+            try {
+              const processes = await fetchProcessList(record.pk.toString());
+              console.log('Process list:', processes);
+            } catch (error) {
+              console.error('Error fetching process list:', error);
+            }
+          }}
+        >
+          <Text>Tree</Text>
         </Button>
       </Space>
     ),

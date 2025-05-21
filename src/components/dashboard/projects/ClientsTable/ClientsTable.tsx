@@ -1,4 +1,3 @@
-// ClientsTable.tsx
 import { Button, Space, Table, TableProps, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { fetchDeviceAppsList } from '../../../../service/device_list';
@@ -9,8 +8,8 @@ const { Text } = Typography;
 const COLUMNS = [
   {
     title: 'Id',
-    dataIndex: 'id',
-    key: 'id',
+    dataIndex: 'pk',
+    key: 'pk',
   },
   {
     title: 'Title',

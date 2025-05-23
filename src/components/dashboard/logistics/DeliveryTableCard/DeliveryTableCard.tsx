@@ -4,9 +4,8 @@ import {
   Table,
   TableProps,
   Spin,
-  Tag,
-  TagProps,
   Input,
+  Tooltip,
 } from 'antd';
 import { ReactNode, useEffect, useState } from 'react';
 import { ColumnsType } from 'antd/es/table';
@@ -22,86 +21,136 @@ const TAB_LIST = [
   { key: 'in transit', tab: 'In Transit' },
 ];
 
+const formatName = (name: string) => {
+  const shortened = name.length > 10 ? name.slice(0, 10) + '...' : name;
+  return (
+    <Tooltip title={name}>
+      <span>{shortened}</span>
+    </Tooltip>
+  );
+};
+
+const formatImage = (image: string) => {
+  const shortened = image.length > 15 ? image.slice(0, 15) + '...' : image;
+  return (
+    <Tooltip title={image}>
+      <span>{shortened}</span>
+    </Tooltip>
+  );
+};
+
+const formatTargetFileName = (target_filename: string | null) => {
+  if (!target_filename) return <span>-</span>;
+  const shortened =
+    target_filename.length > 15
+      ? target_filename.slice(0, 15) + '...'
+      : target_filename;
+  return (
+    <Tooltip title={target_filename}>
+      <span>{shortened}</span>
+    </Tooltip>
+  );
+};
+
+const formatParentImage = (parent_image: string | null) => {
+  if (!parent_image) return <span>-</span>;
+  const shortened =
+    parent_image.length > 15 ? parent_image.slice(0, 15) + '...' : parent_image;
+  return (
+    <Tooltip title={parent_image}>
+      <span>{shortened}</span>
+    </Tooltip>
+  );
+};
+
+const formatCommandLine = (command_line: string | null) => {
+  if (!command_line) return <span>-</span>;
+  const shortened =
+    command_line.length > 15 ? command_line.slice(0, 15) + '...' : command_line;
+  return (
+    <Tooltip title={command_line}>
+      <span>{shortened}</span>
+    </Tooltip>
+  );
+};
+
+const formatSourceIp = (source_ip: string | null) => {
+  if (!source_ip) return <span>-</span>;
+  return <span>{source_ip}</span>;
+};
+
+const formatSourcePort = (source_port: string | null) => {
+  if (!source_port) return <span>-</span>;
+  return <span>{source_port}</span>;
+};
+const formatDestinationIp = (destination_ip: string | null) => {
+  if (!destination_ip) return <span>-</span>;
+  return <span>{destination_ip}</span>;
+};
+const formatDestinationPort = (destination_port: string | null) => {
+  if (!destination_port) return <span>-</span>;
+  return <span>{destination_port}</span>;
+};
+
+// const formatDestinationPort = (destination_port: string | null) => {
+//   if (!destination_port) return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+//   return <span>{destination_port}</span>;
+// };
+
 const BASIC_COLUMNS: ColumnsType<EventData> = [
   {
-    title: 'Id',
-    dataIndex: 'id',
-    key: 'id',
-    render: (text: string) =>
-      typeof text === 'string' ? text.split('-')[0] : text,
+    title: 'User',
+    dataIndex: 'user',
+    key: 'user',
+    render: formatName,
   },
   {
     title: 'Event id',
     dataIndex: 'event_id',
     key: 'event_id',
   },
-
   {
-    title: 'User',
-    dataIndex: 'user',
-    key: 'user',
+    title: 'Image',
+    dataIndex: 'image',
+    key: 'image',
+    render: formatImage,
   },
   {
-    title: 'Protocol',
-    dataIndex: 'protocol',
-    key: 'protocol',
-  },
-
-  {
-    title: 'Source IPv6',
-    dataIndex: 'source_is_ipv6',
-    key: 'source_is_ipv6',
-    render: (isActive: boolean) => {
-      const status = isActive ? 'active' : 'inactive';
-      const color: TagProps['color'] = isActive ? 'green' : 'red';
-
-      return (
-        <Tag color={color} className="text-capitalize">
-          {status}
-        </Tag>
-      );
-    },
+    title: 'Target filename',
+    dataIndex: 'target_filename',
+    key: 'target_filename',
+    render: formatTargetFileName,
   },
   {
-    title: 'Source hostname',
-    dataIndex: 'source_hostname',
-    key: 'source_hostname',
+    title: 'Command line',
+    dataIndex: 'command_line',
+    key: 'command_line',
+    render: formatCommandLine,
   },
   {
-    title: 'Source port',
-    dataIndex: 'source_port',
-    key: 'source_port',
+    title: 'Parent image',
+    dataIndex: 'parent_image',
+    key: 'parent_image',
+    render: formatParentImage,
   },
-  // {
-  //   title: 'Source Port Name',
-  //   dataIndex: 'source_port_name',
-  //   key: 'source_port_name',
-  // },
   {
     title: 'Source ip',
     dataIndex: 'source_ip',
     key: 'source_ip',
+    render: formatSourceIp,
+  },
+
+  {
+    title: 'Source port',
+    dataIndex: 'source_port',
+    key: 'source_port',
+    render: formatSourcePort,
   },
   {
     title: 'UTC time',
     dataIndex: 'utc_time',
     key: 'utc_time',
     render: (date: string) => new Date(date).toLocaleString(),
-  },
-  {
-    title: 'Initiated',
-    dataIndex: 'initiated',
-    key: 'initiated',
-    render: (isActive: boolean) => {
-      const status = isActive ? 'active' : 'inactive';
-      const color: TagProps['color'] = isActive ? 'green' : 'red';
-
-      return (
-        <Tag color={color} className="text-capitalize">
-          {status}
-        </Tag>
-      );
-    },
   },
 ];
 
@@ -117,50 +166,41 @@ const EXPANDED_COLUMNS: ColumnsType<EventData> = [
     key: 'process_guid',
   },
   {
-    title: 'Destination hostname',
-    dataIndex: 'destination_hostname',
-    key: 'destination_hostname',
+    title: 'Parent process guid',
+    dataIndex: 'parent_process_guid',
+    key: 'parent_process_guid',
   },
   {
-    title: 'Destination IPv6',
-    dataIndex: 'destination_is_ipv6',
-    key: 'destination_is_ipv6',
-    render: (isActive: boolean) => {
-      const status = isActive ? 'active' : 'inactive';
-      const color: TagProps['color'] = isActive ? 'green' : 'red';
-
-      return (
-        <Tag color={color} className="text-capitalize">
-          {status}
-        </Tag>
-      );
-    },
+    title: 'Parent process id',
+    dataIndex: 'parent_process_id',
+    key: 'parent_process_id',
+  },
+  {
+    title: 'Destination ip',
+    dataIndex: 'destination_ip',
+    key: 'destination_ip',
+    render: formatDestinationIp,
   },
   {
     title: 'Destination port',
     dataIndex: 'destination_port',
     key: 'destination_port',
-  },
-  // {
-  //   title: 'Destination port name',
-  //   dataIndex: 'destination_port_name',
-  //   key: 'destination_port_name',
-  // },
-  // {
-  //   title: 'Passed sigma rules',
-  //   dataIndex: 'is_passed_sigma_rules',
-  //   key: 'is_passed_sigma_rules',
-  //   render: (val: boolean) => (val ? 'Yes' : 'No'),
-  // },
-  {
-    title: 'Destination ip',
-    dataIndex: 'destination_ip',
-    key: 'destination_ip',
+    render: formatDestinationPort,
   },
   {
-    title: 'Creation UTC time',
-    dataIndex: 'creation_utc_time',
-    key: 'creation_utc_time',
+    title: 'Integrity level',
+    dataIndex: 'integrity_level',
+    key: 'integrity_level',
+  },
+  {
+    title: 'Host id',
+    dataIndex: 'host_id',
+    key: 'host_id',
+  },
+  {
+    title: 'Ingest time',
+    dataIndex: 'ingest_time',
+    key: 'ingest_time',
     render: (date: string) => new Date(date).toLocaleString(),
   },
 ];
@@ -173,7 +213,8 @@ type DeliveryTableProps = {
 const DeliveryTable = ({ data, loading, ...others }: DeliveryTableProps) => {
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
-  const onExpandRow = (expanded: boolean, record: EventData) => {
+  const handleExpand = (expanded: boolean, record: EventData) => {
+    if (!record?.id) return;
     setExpandedRowKeys((prev) =>
       expanded ? [...prev, record.id] : prev.filter((key) => key !== record.id)
     );
@@ -185,7 +226,6 @@ const DeliveryTable = ({ data, loading, ...others }: DeliveryTableProps) => {
         rowKey="id"
         dataSource={data || []}
         columns={BASIC_COLUMNS}
-        // pagination={{ pageSize: 10 }}
         loading={loading}
         expandable={{
           expandedRowRender: (record) => (
@@ -197,14 +237,13 @@ const DeliveryTable = ({ data, loading, ...others }: DeliveryTableProps) => {
               bordered
             />
           ),
-          expandIcon: ({ expanded, onExpand, record }) =>
-            expanded ? (
-              <UpOutlined onClick={(e) => onExpand(record, e)} />
-            ) : (
-              <DownOutlined onClick={(e) => onExpand(record, e)} />
-            ),
+          expandIcon: ({ expanded, onExpand, record }) => {
+            if (!record) return <span>-</span>;
+            const Icon = expanded ? UpOutlined : DownOutlined;
+            return <Icon onClick={(e) => onExpand(record, e)} />;
+          },
           expandedRowKeys,
-          onExpand: onExpandRow,
+          onExpand: handleExpand,
         }}
         {...others}
       />
@@ -218,9 +257,9 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
   const [activeTabKey, setActiveTabKey] = useState<TabKeys>('all');
   const [eventData, setEventData] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<ReactNode | null>(null);
+  const [error, setError] = useState<ReactNode>(null);
 
-  const onTabChange = (key: string) => {
+  const handleTabChange = (key: string) => {
     setActiveTabKey(key);
   };
 
@@ -232,8 +271,8 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
         setEventData(data);
         setError(null);
       } catch (err) {
-        console.error('Fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load data');
+        console.error('Error loading data:', err);
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
@@ -250,7 +289,7 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
       title="Log lists"
       extra={
         <Input.Search
-          placeholder="search"
+          placeholder="Search logs..."
           style={{
             width: window.innerWidth <= 768 ? '100%' : '400px',
             marginLeft: window.innerWidth <= 768 ? 0 : '.5rem',
@@ -260,7 +299,7 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
       }
       tabList={TAB_LIST}
       activeTabKey={activeTabKey}
-      onTabChange={onTabChange}
+      onTabChange={handleTabChange}
       {...others}
     >
       {error ? (

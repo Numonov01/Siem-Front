@@ -1,90 +1,4 @@
-// import { Tree, Typography, Space } from 'antd';
-// import type { DataNode } from 'antd/es/tree';
-// import { ProcessListData } from '../../../../types/process_list';
-
-// interface Props {
-//   processes: ProcessListData[];
-// }
-
-// const { Text } = Typography;
-
-// const formatCmdline = (cmdline: string[]) => cmdline.join(' ');
-
-// function getProcessDetails(proc: ProcessListData): React.ReactNode {
-//   return (
-//     <Space direction="vertical" size={0}>
-//       <Text strong>{proc.exe}</Text>
-
-//       <Text>
-//         <Text type="secondary">PID:</Text>
-//         {proc.title}
-//       </Text>
-//       <Text>
-//         <Text type="secondary">PID:</Text> {proc.pid}
-//       </Text>
-//       <Text>
-//         <Text type="secondary">PPID:</Text> {proc.ppid}
-//       </Text>
-//       <Text>
-//         <Text type="secondary">Process type:</Text> {proc.process_type}
-//       </Text>
-//       <Text>
-//         <Text type="secondary">CWD:</Text> {proc.cwd || "Noma'lum"}
-//       </Text>
-//       <Text>
-//         <Text type="secondary">Cmdline:</Text> {formatCmdline(proc.cmdline)}
-//       </Text>
-//       <Text>
-//         <Text type="secondary">Created:</Text> {proc.created_at}
-//       </Text>
-//       <Text>
-//         <Text type="secondary">Updated:</Text> {proc.updated_at}
-//       </Text>
-//     </Space>
-//   );
-// }
-
-// // Processlar daraxtini qurish
-// function buildTree(processes: ProcessListData[]): DataNode[] {
-//   const map = new Map<number, DataNode>();
-
-//   processes.forEach((proc) => {
-//     map.set(proc.pid, {
-//       title: getProcessDetails(proc),
-//       key: proc.pid,
-//       children: [],
-//     });
-//   });
-
-//   const tree: DataNode[] = [];
-
-//   processes.forEach((proc) => {
-//     const node = map.get(proc.pid);
-//     const parent = map.get(proc.ppid);
-
-//     if (parent && node) {
-//       parent.children?.push(node);
-//     } else if (node) {
-//       tree.push(node);
-//     }
-//   });
-
-//   return tree;
-// }
-
-// export const ProcessTree = ({ processes }: Props) => {
-//   const treeData = buildTree(processes);
-
-//   return (
-//     <Tree
-//       treeData={treeData}
-//       defaultExpandAll
-//       style={{ background: '#fff', padding: 16, borderRadius: 8 }}
-//     />
-//   );
-// };
-
-import { Table, Typography } from 'antd';
+import { Table, Typography, Tooltip, TagProps, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { ProcessListData } from '../../../../types/process_list';
 
@@ -94,7 +8,39 @@ interface Props {
 
 const { Text } = Typography;
 
-const formatCmdline = (cmdline: string[]) => cmdline.join(' ');
+// Cmdline'ni formatlash: 10ta belgidan so'ng '...' va hoverda to‘liq ko‘rsatish
+const formatCmdline = (cmdline: string[]) => {
+  const fullText = cmdline.join(' ');
+  const shortened =
+    fullText.length > 20 ? fullText.slice(0, 20) + '...' : fullText;
+
+  return (
+    <Tooltip title={fullText}>
+      <span>{shortened}</span>
+    </Tooltip>
+  );
+};
+const formatExe = (exe: string) => {
+  const shortened = exe.length > 20 ? exe.slice(0, 20) + '...' : exe;
+
+  return (
+    <Tooltip title={exe}>
+      <span>{shortened}</span>
+    </Tooltip>
+  );
+};
+
+const formatCwd = (cwd: string | null) => {
+  if (!cwd) return "Noma'lum";
+
+  const shortened = cwd.length > 20 ? cwd.slice(0, 20) + '...' : cwd;
+
+  return (
+    <Tooltip title={cwd}>
+      <span>{shortened}</span>
+    </Tooltip>
+  );
+};
 
 // Tree structure yaratish (pid/ppid asosida)
 function buildTree(data: ProcessListData[]): ProcessListData[] {
@@ -105,6 +51,7 @@ function buildTree(data: ProcessListData[]): ProcessListData[] {
   const roots: (ProcessListData & { children?: ProcessListData[] })[] = [];
 
   data.forEach((item) => {
+    // Child bo'lmagan processlar uchun children ni undefined qilib qo'yamiz
     map.set(item.pid, { ...item, children: [] });
   });
 
@@ -118,26 +65,29 @@ function buildTree(data: ProcessListData[]): ProcessListData[] {
     }
   });
 
+  // Child bo'lmagan processlarda children ni undefined qilamiz
+  map.forEach((value) => {
+    if (value.children && value.children.length === 0) {
+      delete value.children;
+    }
+  });
+
   return roots;
 }
 
-//  Table columnlarini yozamiz
+// Table columnlari
 const columns: ColumnsType<ProcessListData> = [
-  {
-    title: 'Process',
-    dataIndex: 'exe',
-    key: 'exe',
-    render: (text: string) => <Text strong>{text}</Text>,
-  },
   {
     title: 'Title',
     dataIndex: 'title',
     key: 'title',
+    render: (text: string) => <Text strong>{text}</Text>,
   },
   {
-    title: 'PID',
-    dataIndex: 'pid',
-    key: 'pid',
+    title: 'Process',
+    dataIndex: 'exe',
+    key: 'exe',
+    render: formatExe,
   },
   {
     title: 'PPID',
@@ -145,15 +95,30 @@ const columns: ColumnsType<ProcessListData> = [
     key: 'ppid',
   },
   {
-    title: 'Type',
+    title: 'PID',
+    dataIndex: 'pid',
+    key: 'pid',
+  },
+  {
+    title: 'Process type',
     dataIndex: 'process_type',
     key: 'process_type',
+    render: (process_type: 'installed' | string) => {
+      const status = process_type ? 'installed' : 'no';
+      const color: TagProps['color'] = process_type ? 'green' : 'red';
+
+      return (
+        <Tag color={color} className="text-capitalize">
+          {status}
+        </Tag>
+      );
+    },
   },
   {
     title: 'CWD',
     dataIndex: 'cwd',
     key: 'cwd',
-    render: (cwd: string | null) => cwd || "Noma'lum",
+    render: formatCwd,
   },
   {
     title: 'Cmdline',
@@ -161,16 +126,26 @@ const columns: ColumnsType<ProcessListData> = [
     key: 'cmdline',
     render: formatCmdline,
   },
-  {
-    title: 'Created',
-    dataIndex: 'created_at',
-    key: 'created_at',
-  },
-  {
-    title: 'Updated',
-    dataIndex: 'updated_at',
-    key: 'updated_at',
-  },
+  //   {
+  //     title: 'Created',
+  //     dataIndex: 'created_at',
+  //     key: 'created_at',
+  //   },
+  //   {
+  //     title: 'Updated',
+  //     dataIndex: 'updated_at',
+  //     key: 'updated_at',
+  //   },
+  //   {
+  //     title: 'Created time',
+  //     dataIndex: 'create_time',
+  //     key: 'create_time',
+  //   },
+  //   {
+  //     title: 'Parent',
+  //     dataIndex: 'parent',
+  //     key: 'parent',
+  //   },
 ];
 
 // Table componenti
@@ -182,7 +157,7 @@ export const ProcessTableTree = ({ processes }: Props) => {
       columns={columns}
       dataSource={treeData}
       rowKey="pid"
-      pagination={false}
+      pagination={{}}
       expandable={{ defaultExpandAllRows: true }}
       scroll={{ x: 'max-content' }}
       style={{ background: '#fff', padding: 16, borderRadius: 8 }}

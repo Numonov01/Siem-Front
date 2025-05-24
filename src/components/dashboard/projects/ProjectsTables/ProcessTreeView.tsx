@@ -4,12 +4,14 @@ import { ProcessListData } from '../../../../types/process_list';
 
 interface Props {
   processes: ProcessListData[];
+  loading: boolean;
 }
 
 const { Text } = Typography;
 
 // Cmdline'ni formatlash: 10ta belgidan so'ng '...' va hoverda to‘liq ko‘rsatish
 const formatCmdline = (cmdline: string[]) => {
+  if (!cmdline || cmdline.length === 0) return '-';
   const fullText = cmdline.join(' ');
   const shortened =
     fullText.length > 20 ? fullText.slice(0, 20) + '...' : fullText;
@@ -31,7 +33,7 @@ const formatExe = (exe: string) => {
 };
 
 const formatCwd = (cwd: string | null) => {
-  if (!cwd) return "Noma'lum";
+  if (!cwd) return '-';
 
   const shortened = cwd.length > 20 ? cwd.slice(0, 20) + '...' : cwd;
 
@@ -104,7 +106,7 @@ const columns: ColumnsType<ProcessListData> = [
     dataIndex: 'process_type',
     key: 'process_type',
     render: (process_type: 'installed' | string) => {
-      const status = process_type ? 'installed' : 'no';
+      const status = process_type ? 'installed' : 'not installed';
       const color: TagProps['color'] = process_type ? 'green' : 'red';
 
       return (
@@ -149,7 +151,7 @@ const columns: ColumnsType<ProcessListData> = [
 ];
 
 // Table componenti
-export const ProcessTableTree = ({ processes }: Props) => {
+export const ProcessTableTree = ({ processes, loading }: Props) => {
   const treeData = buildTree(processes);
 
   return (
@@ -157,6 +159,7 @@ export const ProcessTableTree = ({ processes }: Props) => {
       columns={columns}
       dataSource={treeData}
       rowKey="pid"
+      loading={loading}
       pagination={{}}
       expandable={{ defaultExpandAllRows: true }}
       scroll={{ x: 'max-content' }}

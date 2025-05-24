@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ConfigProvider, Layout, Menu, MenuProps, SiderProps } from 'antd';
 import {
-  BranchesOutlined,
   InfoCircleOutlined,
   LaptopOutlined,
   OrderedListOutlined,
@@ -9,12 +8,7 @@ import {
 } from '@ant-design/icons';
 import { Logo } from '../../components';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  PATH_ABOUT,
-  PATH_DASHBOARD,
-  PATH_LANDING,
-  PATH_SITEMAP,
-} from '../../constants';
+import { PATH_DASHBOARD, PATH_LANDING, PATH_SITEMAP } from '../../constants';
 import { COLOR } from '../../App.tsx';
 
 const { Sider } = Layout;
@@ -38,35 +32,52 @@ const getItem = (
 };
 
 const items: MenuProps['items'] = [
-  getItem('Dashboards', 'dashboards', <PieChartOutlined />, [
-    getItem(
-      <Link to={PATH_DASHBOARD.default}>Default</Link>,
-      'default',
-      <PieChartOutlined />
-    ),
+  // getItem('Dashboards', 'dashboards', <PieChartOutlined />, [
+  //   getItem(
+  //     <Link to={PATH_DASHBOARD.default}>Default</Link>,
+  //     'default',
+  //     <PieChartOutlined />
+  //   ),
 
-    getItem(
-      <Link to={PATH_DASHBOARD.social}>Logs list</Link>,
-      'social',
-      <OrderedListOutlined />
-    ),
+  //   getItem(
+  //     <Link to={PATH_DASHBOARD.social}>Logs list</Link>,
+  //     'social',
+  //     <OrderedListOutlined />
+  //   ),
 
-    getItem(
-      <Link to={PATH_DASHBOARD.logistics}>Agents</Link>,
-      'logistics',
-      <LaptopOutlined />
-    ),
-  ]),
+  //   getItem(
+  //     <Link to={PATH_DASHBOARD.logistics}>Agents</Link>,
+  //     'logistics',
+  //     <LaptopOutlined />
+  //   ),
+  // ]),
+  getItem(
+    <Link to={PATH_DASHBOARD.default}>Default</Link>,
+    'default',
+    <PieChartOutlined />
+  ),
 
   getItem(
-    <Link to={PATH_ABOUT.root}>About</Link>,
-    'about',
-    <InfoCircleOutlined />
+    <Link to={PATH_DASHBOARD.social}>Logs list</Link>,
+    'social',
+    <OrderedListOutlined />
   ),
+
+  getItem(
+    <Link to={PATH_DASHBOARD.logistics}>Agents</Link>,
+    'logistics',
+    <LaptopOutlined />
+  ),
+
+  // getItem(
+  //   <Link to={PATH_ABOUT.root}>Tree</Link>,
+  //   'about',
+  //   <BranchesOutlined />
+  // ),
   getItem(
     <Link to={PATH_SITEMAP.root}>Rules</Link>,
     'sitemap',
-    <BranchesOutlined />
+    <InfoCircleOutlined />
   ),
 
   // getItem('Pages', 'pages', null, [], 'group'),

@@ -5,16 +5,21 @@ import {
   TableProps,
   Tag,
   TagProps,
+  Tooltip,
   Typography,
 } from 'antd';
 import { DeviceListData } from '../../../../types/device_list';
-
-const { Text } = Typography;
+import {
+  AppstoreOutlined,
+  ClusterOutlined,
+  FileTextOutlined,
+} from '@ant-design/icons';
+import { ColumnType } from 'antd/es/table';
 
 const COLUMNS = (
   onAppListClick: (deviceId: number) => void,
   onTreeClick: (deviceId: number) => void
-) => [
+): ColumnType<DeviceListData>[] => [
   {
     title: 'Name',
     dataIndex: 'name',
@@ -73,23 +78,60 @@ const COLUMNS = (
   {
     title: 'Actions',
     key: 'actions',
+    width: 250,
+    fixed: 'right',
     render: (_: unknown, record: DeviceListData) => (
-      <Space size="small" direction="horizontal">
-        <Button size="small" onClick={() => onAppListClick(record.pk)}>
-          <Text>App List</Text>
-        </Button>
-        <Button
-          size="small"
-          onClick={() => console.log('Device Logs clicked:', record.pk)}
-        >
-          <Text>Device Logs</Text>
-        </Button>
-        <Button
-          size="small"
-          onClick={() => onTreeClick(record.pk)} // Use the prop instead of direct fetch
-        >
-          <Text>Tree</Text>
-        </Button>
+      <Space size="small">
+        <Tooltip title="View applications">
+          <Button
+            size="small"
+            icon={<AppstoreOutlined />}
+            onClick={() => onAppListClick(record.pk)}
+            style={{
+              color: '#1890ff',
+              borderColor: '#1890ff',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            Apps
+          </Button>
+        </Tooltip>
+
+        <Tooltip title="View device logs">
+          <Button
+            size="small"
+            icon={<FileTextOutlined />}
+            onClick={() => console.log('Device Logs clicked:', record.pk)}
+            style={{
+              color: '#fa8c16',
+              borderColor: '#fa8c16',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            Logs
+          </Button>
+        </Tooltip>
+
+        <Tooltip title="View process tree">
+          <Button
+            size="small"
+            icon={<ClusterOutlined />}
+            onClick={() => onTreeClick(record.pk)}
+            style={{
+              color: '#52c41a',
+              borderColor: '#52c41a',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            Tree
+          </Button>
+        </Tooltip>
       </Space>
     ),
   },

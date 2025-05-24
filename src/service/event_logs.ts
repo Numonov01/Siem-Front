@@ -1,4 +1,3 @@
-// src/services/logisticsApi.ts
 import axios from 'axios';
 import { EventData } from '../types/event_logs';
 

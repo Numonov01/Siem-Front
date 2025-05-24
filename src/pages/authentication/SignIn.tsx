@@ -84,10 +84,6 @@ export const SignInPage = () => {
           style={{ height: '100%', padding: '2rem' }}
         >
           <Title className="m-0">Login</Title>
-          {/* <Flex gap={4}>
-            <Text>Don't have an account?</Text>
-            <Link href={PATH_AUTH.signup}>Create an account here</Link>
-          </Flex> */}
           <Form
             name="sign-up-form"
             layout="vertical"
@@ -142,7 +138,6 @@ export const SignInPage = () => {
                 >
                   Continue
                 </Button>
-                {/* <Link href={PATH_AUTH.passwordReset}>Forgot password?</Link> */}
               </Flex>
             </Form.Item>
           </Form>

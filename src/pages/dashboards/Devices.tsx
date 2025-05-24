@@ -82,6 +82,7 @@ export const DevicesDashboardPage = () => {
 
   const handleAppListClick = (deviceId: number) => {
     setSelectedDeviceId(deviceId);
+    console.log('App List clicked:', deviceId);
   };
 
   const handleBackToDevices = () => {
@@ -89,8 +90,7 @@ export const DevicesDashboardPage = () => {
   };
   const navigate = useNavigate();
   const handleTreeClick = (deviceId: number) => {
-    navigate('/about', { state: { deviceId } });
-    // Or use context/state management if you prefer
+    navigate(`/about/${deviceId}`);
   };
 
   return (

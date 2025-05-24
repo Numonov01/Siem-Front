@@ -1,6 +1,5 @@
 import { createBrowserRouter, useLocation } from 'react-router-dom';
 import {
-  AccountDeactivePage,
   DefaultDashboardPage,
   Error400Page,
   Error403Page,
@@ -9,14 +8,10 @@ import {
   Error503Page,
   ErrorPage,
   HomePage,
-  PasswordResetPage,
   SignInPage,
-  SignUpPage,
   SitemapPage,
   LogsListDashboardPage,
   UserProfileDetailsPage,
-  VerifyEmailPage,
-  WelcomePage,
   DevicesDashboardPage,
 } from '../pages';
 import { DashboardLayout, UserAccountLayout } from '../layouts';
@@ -121,28 +116,8 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        path: 'signup',
-        element: <SignUpPage />,
-      },
-      {
         path: 'signin',
         element: <SignInPage />,
-      },
-      {
-        path: 'welcome',
-        element: <WelcomePage />,
-      },
-      {
-        path: 'verify-email',
-        element: <VerifyEmailPage />,
-      },
-      {
-        path: 'password-reset',
-        element: <PasswordResetPage />,
-      },
-      {
-        path: 'account-delete',
-        element: <AccountDeactivePage />,
       },
     ],
   },
@@ -179,7 +154,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        path: '',
+        path: '/about/:id',
         element: <AboutPage />,
       },
     ],

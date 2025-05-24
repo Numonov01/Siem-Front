@@ -1,5 +1,5 @@
 import { Flex } from 'antd';
-import { BranchesOutlined, HomeOutlined } from '@ant-design/icons';
+import { HomeOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { PageHeader } from '../components';
 import { RulesCard } from '../components/dashboard/learning/CoursesCard/CoursesCard';
 
@@ -8,7 +8,7 @@ export const SitemapPage = () => {
     <div>
       <Flex vertical gap="middle">
         <PageHeader
-          icon={<BranchesOutlined />}
+          icon={<InfoCircleOutlined />}
           title="Rules"
           breadcrumbs={[
             {

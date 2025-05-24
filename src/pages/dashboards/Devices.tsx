@@ -6,8 +6,7 @@ import {
   PieChartOutlined,
   StepBackwardOutlined,
 } from '@ant-design/icons';
-import { DASHBOARD_ITEMS } from '../../constants';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { fetchDeviceList } from '../../service/device_list';
 import { DeviceListTable } from '../../components/dashboard/projects/ProjectsTables/ProjectsTable';
@@ -119,12 +118,12 @@ export const DevicesDashboardPage = () => {
                 <span>Dashboards</span>
               </>
             ),
-            menu: {
-              items: DASHBOARD_ITEMS.map((d) => ({
-                key: d.title,
-                title: <Link to={d.path}>{d.title}</Link>,
-              })),
-            },
+            // menu: {
+            //   items: DASHBOARD_ITEMS.map((d) => ({
+            //     key: d.title,
+            //     title: <Link to={d.path}>{d.title}</Link>,
+            //   })),
+            // },
           },
           {
             title: selectedDeviceId ? 'Applications' : 'Devices',

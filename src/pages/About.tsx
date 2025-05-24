@@ -1,7 +1,11 @@
-import { Flex } from 'antd';
+import { Alert, Flex } from 'antd';
 import { PageHeader } from '../components';
-import { HomeOutlined, PieChartOutlined } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
+import {
+  BranchesOutlined,
+  HomeOutlined,
+  PieChartOutlined,
+} from '@ant-design/icons';
+import { ReactNode, useEffect, useState } from 'react';
 import { fetchProcessList } from '../service/process_list';
 import { ProcessListData } from '../types/process_list';
 import { ProcessTableTree } from '../components/dashboard/projects/ProjectsTables/ProcessTreeView';
@@ -10,6 +14,7 @@ import { useParams } from 'react-router-dom';
 export const AboutPage = () => {
   const [processes, setProcesses] = useState<ProcessListData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<ReactNode>(null);
   const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
@@ -20,8 +25,12 @@ export const AboutPage = () => {
       try {
         const res = await fetchProcessList(id);
         setProcesses(res);
+        setError(null);
       } catch (err) {
         console.error('Failed to load processes', err);
+        setError(
+          err instanceof Error ? err.message : 'Failed to load processes'
+        );
       } finally {
         setLoading(false);
       }
@@ -33,7 +42,8 @@ export const AboutPage = () => {
     <div>
       <Flex vertical gap="middle">
         <PageHeader
-          title="About"
+          icon={<BranchesOutlined />}
+          title="Tree"
           breadcrumbs={[
             {
               title: (
@@ -54,12 +64,21 @@ export const AboutPage = () => {
               path: '/dashboards',
             },
             {
-              title: 'about',
+              title: 'tree',
             },
           ]}
         />
 
-        <ProcessTableTree processes={processes} loading={loading} />
+        {error ? (
+          <Alert
+            message="Error"
+            description={error.toString()}
+            type="error"
+            showIcon
+          />
+        ) : (
+          <ProcessTableTree processes={processes} loading={loading} />
+        )}
       </Flex>
     </div>
   );

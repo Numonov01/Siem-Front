@@ -4,7 +4,10 @@ import { ColumnsType } from 'antd/es/table';
 import { Card } from '../../../index.ts';
 import { fetchEventLogs } from '../../../../service/event_logs.ts';
 import { DownOutlined, UpOutlined } from '@ant-design/icons';
-import { NetworkEvent } from '../../../../types/event_logs.ts';
+import {
+  NetworkEvent,
+  NetworkEventResponse,
+} from '../../../../types/event_logs.ts';
 
 type TabKeys = 'all' | 'in transit' | string;
 
@@ -13,12 +16,12 @@ const TAB_LIST = [
   { key: 'in transit', tab: 'In Transit' },
 ];
 
-const BASIC_COLUMNS: ColumnsType<NetworkEvent> = [
-  {
-    title: 'Elastic id',
-    dataIndex: 'id',
-    key: 'id',
-  },
+const BASIC_COLUMNS: ColumnsType<NetworkEventResponse> = [
+  // {
+  //   title: 'Elastic id',
+  //   dataIndex: ['results', 'id'],
+  //   key: 'id',
+  // },
   {
     title: 'Event id',
     dataIndex: 'EventId',
@@ -180,16 +183,19 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<ReactNode>(null);
 
-  const handleTabChange = (key: string) => {
-    setActiveTabKey(key);
-  };
-
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [total, setTotal] = useState<number>(0);
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const data = await fetchEventLogs();
-        setEventData(data);
+        const response: NetworkEventResponse = await fetchEventLogs(
+          page,
+          pageSize
+        );
+        setEventData(response.results);
+        setTotal(response.count);
         setError(null);
       } catch (err) {
         console.error('Error loading data:', err);
@@ -200,7 +206,7 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
     };
 
     loadData();
-  }, []);
+  }, [page, pageSize]); // <== shu yerga qo‘shildi
 
   const filteredData =
     activeTabKey === 'in transit'
@@ -222,18 +228,26 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
       }
       tabList={TAB_LIST}
       activeTabKey={activeTabKey}
-      onTabChange={handleTabChange}
+      onTabChange={(key) => setActiveTabKey(key)}
       {...others}
     >
       {error ? (
-        <Alert
-          message="Error"
-          description={error.toString()}
-          type="error"
-          showIcon
-        />
+        <Alert message="Error" description={error} type="error" showIcon />
       ) : (
-        <DeliveryTable data={filteredData} loading={loading} />
+        <DeliveryTable
+          data={filteredData}
+          loading={loading}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+            onChange: (newPage, newSize) => {
+              setPage(newPage);
+              setPageSize(newSize || 10);
+            },
+          }}
+        />
       )}
     </Card>
   );

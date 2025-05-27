@@ -91,7 +91,7 @@ const RULE_COLUMNS = [
   {
     title: 'Title',
     dataIndex: 'title',
-    key: 'ruleTitle',
+    key: 'title',
   },
   {
     title: 'Status',
@@ -113,33 +113,48 @@ const RULE_COLUMNS = [
     dataIndex: 'level',
     key: 'level',
   },
+  {
+    title: 'Date',
+    dataIndex: 'date',
+    key: 'date',
+  },
 ];
 
 const LOG_COLUMNS = [
   {
-    title: 'Event Id',
-    dataIndex: 'EventId',
-    key: 'EventId',
+    title: 'Event ID',
+    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Id'],
+    key: 'eventId',
   },
   {
     title: 'Image',
-    dataIndex: 'Image',
-    key: 'Image',
+    dataIndex: ['Event', 'Image'],
+    key: 'image',
   },
   {
     title: 'File Version',
-    dataIndex: 'FileVersion',
-    key: 'FileVersion',
+    dataIndex: ['Event', 'FileVersion'],
+    key: 'fileVersion',
   },
   {
     title: 'Product',
-    dataIndex: 'Product',
-    key: 'Product',
+    dataIndex: ['Event', 'Product'],
+    key: 'product',
   },
   {
     title: 'Company',
-    dataIndex: 'Company',
-    key: 'Company',
+    dataIndex: ['Event', 'Company'],
+    key: 'company',
+  },
+  {
+    title: 'Command Line',
+    dataIndex: ['Event', 'CommandLine'],
+    key: 'commandLine',
+  },
+  {
+    title: 'User',
+    dataIndex: ['Event', 'User'],
+    key: 'user',
   },
 ];
 
@@ -149,17 +164,19 @@ const expandedRowRender = (record: MismatchesResponse) => {
       <TabPane tab="Rule" key="1">
         <Table
           columns={RULE_COLUMNS}
-          dataSource={record.results}
+          dataSource={[record.rule]}
           pagination={false}
           bordered
+          rowKey="id"
         />
       </TabPane>
       <TabPane tab="Log" key="2">
         <Table
           columns={LOG_COLUMNS}
-          dataSource={record.results}
+          dataSource={[record.log]}
           pagination={false}
           bordered
+          rowKey="EventId"
         />
       </TabPane>
     </Tabs>

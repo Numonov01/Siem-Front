@@ -25,8 +25,8 @@ import { Helmet } from 'react-helmet-async';
 import CountUp from 'react-countup';
 import { Area } from '@ant-design/charts';
 import { CSSProperties, ReactNode, useEffect, useState } from 'react';
-import { fetchBarList } from '../../service/default';
-import { BarData } from '../../types/default';
+import { fetchBarList, fetchMismatchesTable } from '../../service/default';
+import { BarData, MismatchesResponse } from '../../types/default';
 import MitreAttackPieChart from './MitreAttackChart';
 import { fetchDeviceList } from '../../service/device_list';
 import { DeviceListData } from '../../types/device_list';
@@ -54,32 +54,49 @@ const SECURITY_TABS = [
 
 const EVENT_COLUMNS = [
   {
-    title: 'Vendor',
-    dataIndex: 'vendor',
-    key: 'vendor',
+    title: 'Title',
+    dataIndex: ['rule', 'title'],
+    key: 'title',
   },
   {
-    title: 'Server',
-    dataIndex: 'server',
-    key: 'server',
+    title: 'Device Name',
+    dataIndex: 'device_name',
+    key: 'device_name',
+  },
+  {
+    title: 'Level',
+    dataIndex: ['rule', 'level'],
+    key: 'level',
+    render: (_: string) => {
+      let color: TagProps['color'];
+
+      if (_ === 'low') {
+        color = 'cyan';
+      } else if (_ === 'medium') {
+        color = 'geekblue';
+      } else {
+        color = 'magenta';
+      }
+
+      return (
+        <Tag color={color} className="text-capitalize">
+          {_}
+        </Tag>
+      );
+    },
+  },
+];
+
+const RULE_COLUMNS = [
+  {
+    title: 'Title',
+    dataIndex: 'title',
+    key: 'ruleTitle',
   },
   {
     title: 'Status',
     dataIndex: 'status',
     key: 'status',
-  },
-];
-
-const MATCH_COLUMNS = [
-  {
-    title: 'Rule Title',
-    dataIndex: 'ruleTitle',
-    key: 'ruleTitle',
-  },
-  {
-    title: 'Rule ID',
-    dataIndex: 'ruleId',
-    key: 'ruleId',
   },
   {
     title: 'Description',
@@ -92,135 +109,55 @@ const MATCH_COLUMNS = [
     key: 'author',
   },
   {
-    title: 'Modified',
-    dataIndex: 'modified',
-    key: 'modified',
-  },
-];
-
-const MAIN_COLUMNS = [
-  {
     title: 'Level',
     dataIndex: 'level',
     key: 'level',
   },
+];
+
+const LOG_COLUMNS = [
   {
-    title: 'Time',
-    dataIndex: 'time',
-    key: 'time',
+    title: 'Event Id',
+    dataIndex: 'EventId',
+    key: 'EventId',
   },
   {
-    title: 'Message',
-    dataIndex: 'message',
-    key: 'message',
+    title: 'Image',
+    dataIndex: 'Image',
+    key: 'Image',
   },
   {
-    title: 'Title',
-    dataIndex: 'title',
-    key: 'title',
+    title: 'File Version',
+    dataIndex: 'FileVersion',
+    key: 'FileVersion',
   },
   {
-    title: 'Description',
-    dataIndex: 'description',
-    key: 'description',
+    title: 'Product',
+    dataIndex: 'Product',
+    key: 'Product',
+  },
+  {
+    title: 'Company',
+    dataIndex: 'Company',
+    key: 'Company',
   },
 ];
 
-const data = [
-  {
-    key: '1',
-    level: 'High',
-    time: '2025-05-26 16:45:38',
-    message: 'Sigma match found',
-    title: 'Remote Thread Created in Shell Application',
-    description: 'Detects remote thread creation in command shell applications',
-    match: [
-      {
-        key: '1-1',
-        ruleTitle: 'Remote Thread Created in Shell Application',
-        ruleId: 'r2644b3fa-8f6c4-11bc-8f0d1-30b9fda7b46f',
-        description:
-          'Detects remote thread creation in command shell applications, such as "cmd.DXE" and "PowerShell.EXE". It is a common technique used by malware, such as bcdfll, to inject malicious code and execute it within legitimate processes.',
-        author: 'Splunk Research Team',
-        modified: '2024/07/29',
-      },
-    ],
-    event: [
-      {
-        key: '1-2',
-        vendor: 'cmd.exe in TargetImage',
-        server: 'Splunk Research Team',
-        status: 'Event',
-      },
-    ],
-  },
-  {
-    key: '2',
-    level: 'Medium',
-    time: '2025-05-26 14:30:22',
-    message: 'Suspicious process detected',
-    title: 'Unusual Process Execution',
-    description: 'Detected unusual process execution pattern',
-    match: [
-      {
-        key: '2-1',
-        ruleTitle: 'Unusual Process Execution',
-        ruleId: 'a1234b5c6-7d8e9-10fg-11hi-12jklmno13p',
-        description:
-          'Detects unusual process execution patterns that may indicate malicious activity',
-        author: 'Security Team',
-        modified: '2024/08/15',
-      },
-    ],
-    event: [
-      {
-        key: '2-2',
-        vendor: 'explorer.exe',
-        server: 'Corporate Security',
-        status: 'Alert',
-      },
-    ],
-  },
-];
-
-type MainDataType = {
-  key: string;
-  level: string;
-  time: string;
-  message: string;
-  title: string;
-  description: string;
-  match: {
-    key: string;
-    ruleTitle: string;
-    ruleId: string;
-    description: string;
-    author: string;
-    modified: string;
-  }[];
-  event: {
-    key: string;
-    vendor: string;
-    server: string;
-    status: string;
-  }[];
-};
-
-const expandedRowRender = (record: MainDataType) => {
+const expandedRowRender = (record: MismatchesResponse) => {
   return (
     <Tabs defaultActiveKey="1">
-      <TabPane tab="Match" key="1">
+      <TabPane tab="Rule" key="1">
         <Table
-          columns={MATCH_COLUMNS}
-          dataSource={record.match}
+          columns={RULE_COLUMNS}
+          dataSource={record.results}
           pagination={false}
           bordered
         />
       </TabPane>
-      <TabPane tab="Event" key="2">
+      <TabPane tab="Log" key="2">
         <Table
-          columns={EVENT_COLUMNS}
-          dataSource={record.event}
+          columns={LOG_COLUMNS}
+          dataSource={record.results}
           pagination={false}
           bordered
         />
@@ -430,19 +367,13 @@ export const DefaultDashboardPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [barData, setBarData] = useState<BarData[]>([]);
   const [deviceData, setDeviceData] = useState<DeviceListData[]>([]);
+  const [mismatchesData, setMismatchesData] = useState<MismatchesResponse[]>(
+    []
+  );
   const [error, setError] = useState<ReactNode | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const filteredData = data.filter((item) => {
-    const tabFilter =
-      activeTab === 'all' ||
-      (activeTab === 'high' && item.level === 'High') ||
-      (activeTab === 'medium' && item.level === 'Medium') ||
-      (activeTab === 'low' && item.level === 'Low');
-
-    return tabFilter;
-  });
-
+  // pie 1
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -459,12 +390,34 @@ export const DefaultDashboardPage = () => {
     loadData();
   }, []);
 
+  // table1
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
         const data = await fetchDeviceList();
         setDeviceData(data);
+        setError(null);
+      } catch (error) {
+        console.error('Fetch error:', error);
+        setError(
+          error instanceof Error ? error.message : 'Failed to load data'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // table2
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchMismatchesTable();
+        setMismatchesData(data);
         setError(null);
       } catch (error) {
         console.error('Fetch error:', error);
@@ -592,6 +545,8 @@ export const DefaultDashboardPage = () => {
               />
             }
           >
+            {error && <Alert message={error} type="error" />}
+
             <Tabs
               activeKey={activeTab}
               onChange={setActiveTab}
@@ -601,11 +556,20 @@ export const DefaultDashboardPage = () => {
                 <TabPane tab={tab.label} key={tab.key} />
               ))}
             </Tabs>
+
             <Table
-              columns={MAIN_COLUMNS}
-              dataSource={filteredData}
+              dataSource={mismatchesData?.results || []}
+              columns={EVENT_COLUMNS}
+              rowKey="id"
               expandable={{ expandedRowRender }}
               className="overflow-scroll"
+              loading={loading}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '20', '50', '100'],
+              }}
+              locale={{ emptyText: loading ? 'Loading...' : 'No data found' }}
             />
           </Card>
         </Col>

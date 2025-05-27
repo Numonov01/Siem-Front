@@ -7,10 +7,11 @@ interface MitreAttackPieChartProps {
 }
 
 const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
+  // Dastlabki ma'lumotni tayyorlash
   const processedData = data.map((item) => ({
     id: String(item.id),
-    technique: item.tag.replace('attack.t', 'T'),
-    value: 1,
+    technique: item?.tag?.replace('attack.t', 'T') || 'Unknown',
+    value: item.log_count,
   }));
 
   type GroupedDataItem = {
@@ -19,16 +20,20 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
     value: number;
   };
 
+  // Texnikalarni guruhlash (har xil texnikalar bo‘yicha qiymatlarni jamlash)
   const groupedData = processedData.reduce((acc: GroupedDataItem[], curr) => {
+    if (!curr.technique) return acc;
+
     const existing = acc.find((item) => item.technique === curr.technique);
     if (existing) {
-      existing.value += 1;
+      existing.value += curr.value;
     } else {
       acc.push({ ...curr });
     }
     return acc;
-  }, [] as GroupedDataItem[]);
+  }, []);
 
+  // Grafik sozlamalari
   const config = {
     data: groupedData,
     angleField: 'value',
@@ -42,9 +47,10 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
       position: 'right',
     },
     tooltip: {
-      formatter: (datum: GroupedDataItem) => {
-        return { name: datum.technique, value: datum.value };
-      },
+      formatter: (datum: GroupedDataItem) => ({
+        name: datum.technique,
+        value: datum.value,
+      }),
     },
     interactions: [{ type: 'element-selected' }, { type: 'element-active' }],
     statistic: {
@@ -60,7 +66,10 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
       },
     },
     color: (datum: GroupedDataItem) => {
-      const num = parseInt(datum.technique.substring(1));
+      const tech = datum.technique || '';
+      const num = parseInt(tech.replace(/\D/g, '')) || 0;
+
+      // Ranglar ro'yxati
       const colors = [
         '#FF6B6B',
         '#4ECDC4',
@@ -78,7 +87,12 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
         '#90A4AE',
         '#E57373',
         '#81C784',
+        '#FFD54F',
+        '#AED581',
+        '#4FC3F7',
+        '#DCE775',
       ];
+
       return colors[num % colors.length];
     },
   };

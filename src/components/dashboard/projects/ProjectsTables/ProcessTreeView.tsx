@@ -128,26 +128,26 @@ const columns: ColumnsType<ProcessListData> = [
     key: 'cmdline',
     render: formatCmdline,
   },
-  //   {
-  //     title: 'Created',
-  //     dataIndex: 'created_at',
-  //     key: 'created_at',
-  //   },
-  //   {
-  //     title: 'Updated',
-  //     dataIndex: 'updated_at',
-  //     key: 'updated_at',
-  //   },
-  //   {
-  //     title: 'Created time',
-  //     dataIndex: 'create_time',
-  //     key: 'create_time',
-  //   },
-  //   {
-  //     title: 'Parent',
-  //     dataIndex: 'parent',
-  //     key: 'parent',
-  //   },
+  {
+    title: 'Created',
+    dataIndex: 'created_at',
+    key: 'created_at',
+  },
+  {
+    title: 'Updated',
+    dataIndex: 'updated_at',
+    key: 'updated_at',
+  },
+  {
+    title: 'Created time',
+    dataIndex: 'create_time',
+    key: 'create_time',
+  },
+  {
+    title: 'Parent',
+    dataIndex: 'parent',
+    key: 'parent',
+  },
 ];
 
 // Table componenti

@@ -44,12 +44,7 @@ const COLUMNS = (
     dataIndex: 'os_name',
     key: 'os_name',
   },
-  {
-    title: 'Last active',
-    dataIndex: 'last_active',
-    key: 'last_active',
-    render: (date: string) => new Date(date).toLocaleString(),
-  },
+
   {
     title: 'Ip address',
     dataIndex: 'ip_address',
@@ -74,6 +69,12 @@ const COLUMNS = (
         </Tag>
       );
     },
+  },
+  {
+    title: 'Last active',
+    dataIndex: 'last_active',
+    key: 'last_active',
+    render: (date: string) => new Date(date).toLocaleString(),
   },
   {
     title: 'Actions',

@@ -12,7 +12,6 @@ import {
   InstagramFilled,
   LinkedinFilled,
   TwitterOutlined,
-  YoutubeFilled,
 } from '@ant-design/icons';
 import { Card } from '../../../index.ts';
 import { createElement } from 'react';
@@ -42,12 +41,6 @@ const SOCIALS_DATA = [
     title: 'linkedIn',
     diff: 3.79,
     value: 738382,
-  },
-  {
-    icon: YoutubeFilled,
-    title: 'youtube',
-    diff: -5.3,
-    value: 892123,
   },
 ];
 

@@ -25,13 +25,41 @@ import {
   fetchMismatchesRule,
   fetchMismatchesTable,
   fetchMismatchesLog,
+  fetchMismatchesChart,
 } from '../../service/default';
-import { BarData, MismatchesResponse, SigmaRule } from '../../types/default';
+import {
+  BarData,
+  MismatchesLevelChart,
+  MismatchesResponse,
+  SigmaRule,
+} from '../../types/default';
 import MitreAttackPieChart from './MitreAttackChart';
 import { fetchDeviceList } from '../../service/device_list';
 import { DeviceListData } from '../../types/device_list';
 import { ColumnsType } from 'antd/es/table';
 import { NetworkEvent } from '../../types/event_logs';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Legend,
+  ArcElement
+);
 
 const { TabPane } = Tabs;
 
@@ -99,131 +127,6 @@ const EVENT_COLUMNS: ColumnsType<MismatchesResponse> = [
   },
 ];
 
-const RULE_COLUMNS: ColumnsType<SigmaRule> = [
-  {
-    title: 'Title',
-    dataIndex: 'title',
-    key: 'title',
-    render: (title: string) => (
-      <Tooltip title={title}>
-        {title.length > 30 ? `${title.substring(0, 30)}...` : title}
-      </Tooltip>
-    ),
-  },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-  },
-  {
-    title: 'Description',
-    dataIndex: 'description',
-    key: 'description',
-    render: (description: string) => (
-      <Tooltip title={description}>
-        {description.length > 30
-          ? `${description.substring(0, 30)}...`
-          : description}
-      </Tooltip>
-    ),
-  },
-  {
-    title: 'Author',
-    dataIndex: 'author',
-    key: 'author',
-  },
-  {
-    title: 'Level',
-    dataIndex: 'level',
-    key: 'level',
-    render: (_: string) => {
-      let color: TagProps['color'];
-
-      if (_ === 'low') {
-        color = 'cyan';
-      } else if (_ === 'medium') {
-        color = 'geekblue';
-      } else {
-        color = 'magenta';
-      }
-
-      return (
-        <Tag color={color} className="text-capitalize">
-          {_}
-        </Tag>
-      );
-    },
-  },
-  {
-    title: 'Date',
-    dataIndex: 'date',
-    key: 'date',
-  },
-];
-
-const LOG_COLUMNS: ColumnsType<NetworkEvent> = [
-  {
-    title: 'Event id',
-    dataIndex: 'EventId',
-    key: 'EventId',
-  },
-  {
-    title: 'User',
-    dataIndex: ['Event', 'User'],
-    key: 'User',
-  },
-  {
-    title: 'LogonId',
-    dataIndex: ['Event', 'LogonId'],
-    key: 'LogonId',
-  },
-
-  {
-    title: 'Company',
-    dataIndex: ['Event', 'Company'],
-    key: 'Company',
-  },
-  {
-    title: 'OriginalFileName',
-    dataIndex: ['Event', 'OriginalFileName'],
-    key: 'OriginalFileName',
-  },
-  {
-    title: 'Integrity Level',
-    dataIndex: ['Event', 'IntegrityLevel'],
-    key: 'IntegrityLevel',
-    render: (_: string) => {
-      let color: TagProps['color'];
-
-      if (_ === 'low') {
-        color = 'cyan';
-      } else if (_ === 'medium') {
-        color = 'geekblue';
-      } else {
-        color = 'magenta';
-      }
-
-      return (
-        <Tag color={color} className="text-capitalize">
-          {_}
-        </Tag>
-      );
-    },
-  },
-  {
-    title: 'Utc Time',
-    dataIndex: ['Event', 'UtcTime'],
-    key: 'UtcTime',
-    render: (date: string) => {
-      const originalDate = new Date(date);
-      const adjustedDate = new Date(
-        originalDate.getTime() + 5 * 60 * 60 * 1000
-      );
-      return adjustedDate.toLocaleString();
-    },
-  },
-];
-
 const ExpandedRow = ({ record }: { record: MismatchesResponse }) => {
   const [ruleData, setRuleData] = useState<SigmaRule | null>(null);
   const [logData, setLogData] = useState<NetworkEvent | null>(null);
@@ -272,16 +175,75 @@ const ExpandedRow = ({ record }: { record: MismatchesResponse }) => {
     fetchData();
   }, [record.log_id, record.rule.id]);
 
+  const VERTICAL_TABLE_COLUMNS = [
+    {
+      title: 'Field',
+      dataIndex: 'field',
+      key: 'field',
+      width: '30%',
+      render: (text: string) => <strong>{text}</strong>,
+    },
+    {
+      title: 'Value',
+      dataIndex: 'value',
+      key: 'value',
+      width: '70%',
+      render: (value: unknown) => {
+        if (typeof value === 'object' && value !== null)
+          return JSON.stringify(value);
+        return String(value);
+      },
+    },
+  ];
+
+  const getRuleData = () => {
+    if (!ruleData) return [];
+
+    return [
+      { field: 'Title', value: ruleData.title },
+      { field: 'Description', value: ruleData.description },
+      { field: 'Status', value: ruleData.status },
+      { field: 'Level', value: ruleData.level },
+      { field: 'Tags', value: ruleData.tags.join(' => ') },
+      { field: 'References', value: ruleData.references.join(' => ') },
+      { field: 'Author', value: ruleData.author },
+      { field: 'Date', value: ruleData.date },
+    ];
+  };
+
+  const getLogData = () => {
+    if (!logData) return [];
+
+    return [
+      { field: 'Event ID', value: logData.EventId },
+      { field: 'User', value: logData.Event?.User },
+      { field: 'Image', value: logData.Event?.Image },
+      { field: 'Company', value: logData.Event?.Company },
+      { field: 'Command Line', value: logData.Event?.CommandLine },
+      { field: 'Parent Image', value: logData.Event?.ParentImage },
+      { field: 'Parent Command Line', value: logData.Event?.ParentCommandLine },
+      { field: 'Original File Name', value: logData.Event?.OriginalFileName },
+      { field: 'Integrity Level', value: logData.Event?.IntegrityLevel },
+      {
+        field: 'UTC Time',
+        value: logData.Event?.UtcTime
+          ? new Date(logData.Event.UtcTime).toLocaleString()
+          : null,
+      },
+    ];
+  };
+
   return (
     <Tabs defaultActiveKey="1">
       <TabPane tab="Rule" key="1">
         {error.rule && <Alert message={error.rule} type="error" showIcon />}
         <Table
-          columns={RULE_COLUMNS}
-          dataSource={ruleData ? [ruleData] : []}
+          columns={VERTICAL_TABLE_COLUMNS}
+          dataSource={getRuleData()}
           pagination={false}
           bordered
-          rowKey="id"
+          showHeader={false}
+          rowKey="field"
           loading={loading.rule}
           locale={{ emptyText: loading.rule ? 'Loading...' : 'No data found' }}
         />
@@ -289,11 +251,12 @@ const ExpandedRow = ({ record }: { record: MismatchesResponse }) => {
       <TabPane tab="Log" key="2">
         {error.log && <Alert message={error.log} type="error" showIcon />}
         <Table
-          columns={LOG_COLUMNS}
-          dataSource={logData ? [logData] : []}
+          columns={VERTICAL_TABLE_COLUMNS}
+          dataSource={getLogData()}
           pagination={false}
           bordered
-          rowKey="EventId"
+          showHeader={false}
+          rowKey="field"
           loading={loading.log}
           locale={{ emptyText: loading.log ? 'Loading...' : 'No data found' }}
         />
@@ -359,6 +322,58 @@ const PRODUCTS_COLUMNS = [
   },
 ];
 
+const MismatchesLevelLineChart = ({ data }: { data: MismatchesLevelChart }) => {
+  const chartData = {
+    labels: data.labels,
+    datasets: data.datasets.map((dataset) => ({
+      label: dataset.label,
+      data: dataset.data,
+      borderColor:
+        dataset.label === 'High'
+          ? 'rgb(255, 99, 132)'
+          : dataset.label === 'Medium'
+            ? 'rgb(54, 162, 235)'
+            : 'rgb(75, 192, 192)',
+      backgroundColor:
+        dataset.label === 'High'
+          ? 'rgba(255, 99, 132, 0.5)'
+          : dataset.label === 'Medium'
+            ? 'rgba(54, 162, 235, 0.5)'
+            : 'rgba(75, 192, 192, 0.5)',
+      tension: 0.1,
+    })),
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Count',
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Time',
+        },
+      },
+    },
+  };
+
+  return <Line options={options} data={chartData} />;
+};
+
 export const DefaultDashboardPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [barData, setBarData] = useState<BarData[]>([]);
@@ -366,11 +381,12 @@ export const DefaultDashboardPage = () => {
   const [mismatchesData, setMismatchesData] = useState<MismatchesResponse[]>(
     []
   );
+  const [mismatchesChartData, setMismatchesChartData] =
+    useState<MismatchesLevelChart | null>(null);
   const [error, setError] = useState<ReactNode | null>(null);
   const [loading, setLoading] = useState(false);
   const [filteredData, setFilteredData] = useState<MismatchesResponse[]>([]);
 
-  // Tab o'zgarganda filtrni qo'llash
   useEffect(() => {
     if (!mismatchesData?.results) return;
 
@@ -442,6 +458,23 @@ export const DefaultDashboardPage = () => {
     loadData();
   }, []);
 
+  // line chart data
+  useEffect(() => {
+    const loadChartData = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchMismatchesChart();
+        setMismatchesChartData(data);
+      } catch (error) {
+        console.error('Error fetching mismatches chart data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadChartData();
+  }, []);
+
   return (
     <div>
       <Helmet>
@@ -494,7 +527,7 @@ export const DefaultDashboardPage = () => {
           </Card>
         </Col>
 
-        <Col xs={24} lg={32}>
+        <Col xs={24} lg={12}>
           <Card
             title="MITRE ATT&CK Techniques Distribution"
             extra={
@@ -509,6 +542,28 @@ export const DefaultDashboardPage = () => {
             loading={loading}
           >
             <MitreAttackPieChart data={barData} />
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={12}>
+          <Card
+            title="Mismatches Level Trend"
+            extra={
+              <Popover
+                content="Trend of mismatches by severity level over time"
+                title="Mismatches Trend"
+              >
+                <Button icon={<QuestionOutlined />} {...POPOVER_BUTTON_PROPS} />
+              </Popover>
+            }
+            style={cardStyles}
+            loading={loading}
+          >
+            {mismatchesChartData ? (
+              <MismatchesLevelLineChart data={mismatchesChartData} />
+            ) : (
+              <Alert message="No chart data available" type="info" />
+            )}
           </Card>
         </Col>
 

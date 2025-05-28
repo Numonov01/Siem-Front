@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { BarData, MismatchesResponse, SigmaRule } from '../types/default';
+import {
+  BarData,
+  MismatchesLevelChart,
+  MismatchesResponse,
+  SigmaRule,
+} from '../types/default';
 import { NetworkEvent } from '../types/event_logs';
 
 const api = axios.create({
@@ -46,6 +51,19 @@ export const fetchMismatchesRule = async (id: number): Promise<SigmaRule> => {
     return response.data;
   } catch (error) {
     console.error('Error fetching device data:', error);
+    throw error;
+  }
+};
+
+export const fetchMismatchesChart = async (): Promise<
+  MismatchesLevelChart[]
+> => {
+  try {
+    const response = await api.get('/elastic/sigma-mismatches/level-chart/');
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching device list:', error);
     throw error;
   }
 };

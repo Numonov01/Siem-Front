@@ -7,6 +7,7 @@ import {
   Input,
   TagProps,
   Tag,
+  Tooltip,
 } from 'antd';
 import { ReactNode, useEffect, useState } from 'react';
 import { ColumnsType } from 'antd/es/table';
@@ -101,6 +102,11 @@ const EXPANDED_COLUMNS: ColumnsType<NetworkEvent> = [
     title: 'Image',
     dataIndex: ['Event', 'Image'],
     key: 'Image',
+    render: (Image: string) => (
+      <Tooltip title={Image}>
+        {Image.length > 30 ? `${Image.substring(0, 30)}...` : Image}
+      </Tooltip>
+    ),
   },
   {
     title: 'File version',
@@ -116,6 +122,13 @@ const EXPANDED_COLUMNS: ColumnsType<NetworkEvent> = [
     title: 'Command line',
     dataIndex: ['Event', 'CommandLine'],
     key: 'CommandLine',
+    render: (CommandLine: string) => (
+      <Tooltip title={CommandLine}>
+        {CommandLine.length > 30
+          ? `${CommandLine.substring(0, 30)}...`
+          : CommandLine}
+      </Tooltip>
+    ),
   },
   {
     title: 'Logon id',

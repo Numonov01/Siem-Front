@@ -49,3 +49,10 @@ export type SigmaRule = {
   level: string;
   filename: string;
 };
+export type MismatchesLevelChart = {
+  labels: string[]; // ["2025-05-28 11:00", "2025-05-28 13:00"]
+  datasets: {
+    label: string; // "Low", "Medium", "High"
+    data: number[];
+  }[];
+};

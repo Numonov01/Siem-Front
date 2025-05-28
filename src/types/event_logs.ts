@@ -63,29 +63,3 @@ export type NetworkEventResponse = {
   page_size: number;
   results: NetworkEvent[];
 };
-
-export type SigmaRule = {
-  title: string;
-  id: string;
-  status: string;
-  description: string;
-  references: string[];
-  author: string;
-  date: string;
-  modified: string;
-  tags: string[];
-  logsource: {
-    category: string;
-    product: string;
-  };
-  detection: {
-    selection: {
-      'CommandLine|contains|all': string[];
-      'CommandLine|contains': string[];
-    };
-    condition: string;
-  };
-  falsepositives: string[];
-  level: string;
-  filename: string;
-};

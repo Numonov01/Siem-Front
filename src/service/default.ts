@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { BarData, MismatchesResponse } from '../types/default';
-import { NetworkEvent, SigmaRule } from '../types/event_logs';
+import { BarData, MismatchesResponse, SigmaRule } from '../types/default';
+import { NetworkEvent } from '../types/event_logs';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -41,7 +41,7 @@ export const fetchMismatchesLog = async (id: number): Promise<NetworkEvent> => {
 
 export const fetchMismatchesRule = async (id: number): Promise<SigmaRule> => {
   try {
-    const response = await api.get(`/agent/elastic/logs/${id}/`);
+    const response = await api.get(`/agent/sigma-rule/${id}/`);
     console.log(response.data);
     return response.data;
   } catch (error) {

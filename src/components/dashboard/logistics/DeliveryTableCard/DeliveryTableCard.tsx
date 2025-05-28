@@ -1,4 +1,13 @@
-import { Alert, CardProps, Table, TableProps, Spin, Input } from 'antd';
+import {
+  Alert,
+  CardProps,
+  Table,
+  TableProps,
+  Spin,
+  Input,
+  TagProps,
+  Tag,
+} from 'antd';
 import { ReactNode, useEffect, useState } from 'react';
 import { ColumnsType } from 'antd/es/table';
 import { Card } from '../../../index.ts';
@@ -16,12 +25,7 @@ const TAB_LIST = [
   { key: 'in transit', tab: 'In Transit' },
 ];
 
-const BASIC_COLUMNS: ColumnsType<NetworkEventResponse> = [
-  // {
-  //   title: 'Elastic id',
-  //   dataIndex: ['results', 'id'],
-  //   key: 'id',
-  // },
+const BASIC_COLUMNS: ColumnsType<NetworkEvent> = [
   {
     title: 'Event id',
     dataIndex: 'EventId',
@@ -33,37 +37,46 @@ const BASIC_COLUMNS: ColumnsType<NetworkEventResponse> = [
   //   key: 'RuleName',
   // },
   {
-    title: 'TimeStamp',
+    title: 'Time stamp',
     dataIndex: ['Event', 'EventHeader', 'TimeStamp'],
     key: 'TimeStamp',
   },
   {
-    title: 'EventProperty',
-    dataIndex: ['Event', 'EventHeader', 'EventProperty'],
-    key: 'EventProperty',
+    title: 'Parent user',
+    dataIndex: ['Event', 'ParentUser'],
+    key: 'ParentUser',
   },
   {
-    title: 'ThreadId',
+    title: 'Thread id',
     dataIndex: ['Event', 'EventHeader', 'ThreadId'],
     key: 'ThreadId',
   },
   {
-    title: 'ProcessId',
+    title: 'Process id',
     dataIndex: ['Event', 'EventHeader', 'ProcessId'],
     key: 'ProcessId',
   },
 
   {
-    title: 'KernelTime',
+    title: 'Kernel time',
     dataIndex: ['Event', 'EventHeader', 'KernelTime'],
     key: 'KernelTime',
   },
+  {
+    title: 'Integrity level',
+    dataIndex: ['Event', 'IntegrityLevel'],
+    key: 'IntegrityLevel',
+    render: (isActive: boolean) => {
+      const status = isActive ? 'active' : 'inactive';
+      const color: TagProps['color'] = isActive ? 'green' : 'red';
 
-  // {
-  //   title: 'ActivityId',
-  //   dataIndex: ['Event', 'EventHeader', 'ActivityId'],
-  //   key: 'ActivityId',
-  // },
+      return (
+        <Tag color={color} className="text-capitalize">
+          {status}
+        </Tag>
+      );
+    },
+  },
   {
     title: 'UTC time',
     dataIndex: ['Event', 'UtcTime'],
@@ -79,43 +92,38 @@ const BASIC_COLUMNS: ColumnsType<NetworkEventResponse> = [
 ];
 
 const EXPANDED_COLUMNS: ColumnsType<NetworkEvent> = [
+  // {
+  //   title: 'Task name',
+  //   dataIndex: ['Event', 'Task Name'],
+  //   key: 'Task Name',
+  // },
   {
-    title: 'Id',
-    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Id'],
-    key: 'EventDescriptorId',
+    title: 'Image',
+    dataIndex: ['Event', 'Image'],
+    key: 'Image',
   },
   {
-    title: 'Version',
-    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Version'],
-    key: 'Version',
+    title: 'File version',
+    dataIndex: ['Event', 'FileVersion'],
+    key: 'FileVersion',
   },
   {
-    title: 'Channel',
-    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Channel'],
-    key: 'Channel',
+    title: 'Original fileName',
+    dataIndex: ['Event', 'OriginalFileName'],
+    key: 'OriginalFileName',
   },
   {
-    title: 'Level',
-    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Level'],
-    key: 'Level',
+    title: 'Command line',
+    dataIndex: ['Event', 'CommandLine'],
+    key: 'CommandLine',
   },
   {
-    title: 'Opcode',
-    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Opcode'],
-    key: 'Opcode',
+    title: 'Logon id',
+    dataIndex: ['Event', 'LogonId'],
+    key: 'LogonId',
   },
   {
-    title: 'Task',
-    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Task'],
-    key: 'Task',
-  },
-  {
-    title: 'Keyword',
-    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Keyword'],
-    key: 'Keyword',
-  },
-  {
-    title: 'UserTime',
+    title: 'User time',
     dataIndex: ['Event', 'EventHeader', 'UserTime'],
     key: 'UserTime',
     render: (date: string) => {
@@ -190,12 +198,12 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const response: NetworkEventResponse = await fetchEventLogs(
-          page,
-          pageSize
-        );
-        setEventData(response.results);
-        setTotal(response.count);
+        const response = await fetchEventLogs(page, pageSize);
+        const eventResponse: NetworkEventResponse = Array.isArray(response)
+          ? response[0]
+          : response;
+        setEventData(eventResponse.results);
+        setTotal(eventResponse.count);
         setError(null);
       } catch (err) {
         console.error('Error loading data:', err);
@@ -206,7 +214,7 @@ export const DeliveryTableCard = ({ ...others }: Props) => {
     };
 
     loadData();
-  }, [page, pageSize]); // <== shu yerga qo‘shildi
+  }, [page, pageSize]);
 
   const filteredData =
     activeTabKey === 'in transit'

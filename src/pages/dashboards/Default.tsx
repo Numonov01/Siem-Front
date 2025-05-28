@@ -3,33 +3,35 @@ import {
   Button,
   ButtonProps,
   Col,
-  Flex,
   Input,
   Popover,
   Row,
-  Space,
   Table,
   Tabs,
   Tag,
   TagProps,
-  Typography,
+  Tooltip,
 } from 'antd';
-import { Card, MarketingSocialStatsCard, PageHeader } from '../../components';
+import { Card, PageHeader } from '../../components';
 import {
-  ArrowUpOutlined,
   HomeOutlined,
   PieChartOutlined,
   QuestionOutlined,
 } from '@ant-design/icons';
 import { Helmet } from 'react-helmet-async';
-import CountUp from 'react-countup';
-import { Area } from '@ant-design/charts';
 import { CSSProperties, ReactNode, useEffect, useState } from 'react';
-import { fetchBarList, fetchMismatchesTable } from '../../service/default';
-import { BarData, MismatchesResponse } from '../../types/default';
+import {
+  fetchBarList,
+  fetchMismatchesRule,
+  fetchMismatchesTable,
+  fetchMismatchesLog,
+} from '../../service/default';
+import { BarData, MismatchesResponse, SigmaRule } from '../../types/default';
 import MitreAttackPieChart from './MitreAttackChart';
 import { fetchDeviceList } from '../../service/device_list';
 import { DeviceListData } from '../../types/device_list';
+import { ColumnsType } from 'antd/es/table';
+import { NetworkEvent } from '../../types/event_logs';
 
 const { TabPane } = Tabs;
 
@@ -52,16 +54,26 @@ const SECURITY_TABS = [
   },
 ];
 
-const EVENT_COLUMNS = [
+const EVENT_COLUMNS: ColumnsType<MismatchesResponse> = [
+  {
+    title: 'Rule id',
+    dataIndex: ['rule', 'id'],
+    key: 'id',
+  },
+  {
+    title: 'Device Name',
+    dataIndex: 'device_name',
+    key: 'device_name',
+  },
   {
     title: 'Title',
     dataIndex: ['rule', 'title'],
     key: 'title',
   },
   {
-    title: 'Device Name',
-    dataIndex: 'device_name',
-    key: 'device_name',
+    title: 'Log id',
+    dataIndex: 'log_id',
+    key: 'log_id',
   },
   {
     title: 'Level',
@@ -87,11 +99,16 @@ const EVENT_COLUMNS = [
   },
 ];
 
-const RULE_COLUMNS = [
+const RULE_COLUMNS: ColumnsType<SigmaRule> = [
   {
     title: 'Title',
     dataIndex: 'title',
     key: 'title',
+    render: (title: string) => (
+      <Tooltip title={title}>
+        {title.length > 30 ? `${title.substring(0, 30)}...` : title}
+      </Tooltip>
+    ),
   },
   {
     title: 'Status',
@@ -102,6 +119,13 @@ const RULE_COLUMNS = [
     title: 'Description',
     dataIndex: 'description',
     key: 'description',
+    render: (description: string) => (
+      <Tooltip title={description}>
+        {description.length > 30
+          ? `${description.substring(0, 30)}...`
+          : description}
+      </Tooltip>
+    ),
   },
   {
     title: 'Author',
@@ -112,6 +136,23 @@ const RULE_COLUMNS = [
     title: 'Level',
     dataIndex: 'level',
     key: 'level',
+    render: (_: string) => {
+      let color: TagProps['color'];
+
+      if (_ === 'low') {
+        color = 'cyan';
+      } else if (_ === 'medium') {
+        color = 'geekblue';
+      } else {
+        color = 'magenta';
+      }
+
+      return (
+        <Tag color={color} className="text-capitalize">
+          {_}
+        </Tag>
+      );
+    },
   },
   {
     title: 'Date',
@@ -120,70 +161,146 @@ const RULE_COLUMNS = [
   },
 ];
 
-const LOG_COLUMNS = [
+const LOG_COLUMNS: ColumnsType<NetworkEvent> = [
   {
-    title: 'Event ID',
-    dataIndex: ['Event', 'EventHeader', 'EventDescriptor', 'Id'],
-    key: 'eventId',
-  },
-  {
-    title: 'Image',
-    dataIndex: ['Event', 'Image'],
-    key: 'image',
-  },
-  {
-    title: 'File Version',
-    dataIndex: ['Event', 'FileVersion'],
-    key: 'fileVersion',
-  },
-  {
-    title: 'Product',
-    dataIndex: ['Event', 'Product'],
-    key: 'product',
-  },
-  {
-    title: 'Company',
-    dataIndex: ['Event', 'Company'],
-    key: 'company',
-  },
-  {
-    title: 'Command Line',
-    dataIndex: ['Event', 'CommandLine'],
-    key: 'commandLine',
+    title: 'Event id',
+    dataIndex: 'EventId',
+    key: 'EventId',
   },
   {
     title: 'User',
     dataIndex: ['Event', 'User'],
-    key: 'user',
+    key: 'User',
+  },
+  {
+    title: 'LogonId',
+    dataIndex: ['Event', 'LogonId'],
+    key: 'LogonId',
+  },
+
+  {
+    title: 'Company',
+    dataIndex: ['Event', 'Company'],
+    key: 'Company',
+  },
+  {
+    title: 'OriginalFileName',
+    dataIndex: ['Event', 'OriginalFileName'],
+    key: 'OriginalFileName',
+  },
+  {
+    title: 'Integrity Level',
+    dataIndex: ['Event', 'IntegrityLevel'],
+    key: 'IntegrityLevel',
+    render: (_: string) => {
+      let color: TagProps['color'];
+
+      if (_ === 'low') {
+        color = 'cyan';
+      } else if (_ === 'medium') {
+        color = 'geekblue';
+      } else {
+        color = 'magenta';
+      }
+
+      return (
+        <Tag color={color} className="text-capitalize">
+          {_}
+        </Tag>
+      );
+    },
+  },
+  {
+    title: 'Utc Time',
+    dataIndex: ['Event', 'UtcTime'],
+    key: 'UtcTime',
+    render: (date: string) => {
+      const originalDate = new Date(date);
+      const adjustedDate = new Date(
+        originalDate.getTime() + 5 * 60 * 60 * 1000
+      );
+      return adjustedDate.toLocaleString();
+    },
   },
 ];
 
-const expandedRowRender = (record: MismatchesResponse) => {
+const ExpandedRow = ({ record }: { record: MismatchesResponse }) => {
+  const [ruleData, setRuleData] = useState<SigmaRule | null>(null);
+  const [logData, setLogData] = useState<NetworkEvent | null>(null);
+  const [loading, setLoading] = useState({
+    rule: false,
+    log: false,
+  });
+  const [error, setError] = useState({
+    rule: null as ReactNode | null,
+    log: null as ReactNode | null,
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading((prev) => ({ ...prev, rule: true }));
+        const rule = await fetchMismatchesRule(record.rule.id);
+        setRuleData(rule);
+        setError((prev) => ({ ...prev, rule: null }));
+      } catch (err) {
+        console.error('Error fetching rule:', err);
+        setError((prev) => ({
+          ...prev,
+          rule: err instanceof Error ? err.message : 'Failed to load rule data',
+        }));
+      } finally {
+        setLoading((prev) => ({ ...prev, rule: false }));
+      }
+
+      try {
+        setLoading((prev) => ({ ...prev, log: true }));
+        const log = await fetchMismatchesLog(record.log_id);
+        setLogData(log);
+        setError((prev) => ({ ...prev, log: null }));
+      } catch (err) {
+        console.error('Error fetching log:', err);
+        setError((prev) => ({
+          ...prev,
+          log: err instanceof Error ? err.message : 'Failed to load log data',
+        }));
+      } finally {
+        setLoading((prev) => ({ ...prev, log: false }));
+      }
+    };
+
+    fetchData();
+  }, [record.log_id, record.rule.id]);
+
   return (
     <Tabs defaultActiveKey="1">
       <TabPane tab="Rule" key="1">
+        {error.rule && <Alert message={error.rule} type="error" showIcon />}
         <Table
           columns={RULE_COLUMNS}
-          dataSource={[record.rule]}
+          dataSource={ruleData ? [ruleData] : []}
           pagination={false}
           bordered
           rowKey="id"
+          loading={loading.rule}
+          locale={{ emptyText: loading.rule ? 'Loading...' : 'No data found' }}
         />
       </TabPane>
       <TabPane tab="Log" key="2">
+        {error.log && <Alert message={error.log} type="error" showIcon />}
         <Table
           columns={LOG_COLUMNS}
-          dataSource={[record.log]}
+          dataSource={logData ? [logData] : []}
           pagination={false}
           bordered
           rowKey="EventId"
+          loading={loading.log}
+          locale={{ emptyText: loading.log ? 'Loading...' : 'No data found' }}
         />
       </TabPane>
     </Tabs>
   );
 };
-
-const { Title } = Typography;
 
 const POPOVER_BUTTON_PROPS: ButtonProps = {
   type: 'text',
@@ -191,144 +308,6 @@ const POPOVER_BUTTON_PROPS: ButtonProps = {
 
 const cardStyles: CSSProperties = {
   height: '100%',
-};
-
-const SalesChart = () => {
-  const data = [
-    {
-      country: 'Online Store',
-      date: 'Jan',
-      value: 1390.5,
-    },
-    {
-      country: 'Online Store',
-      date: 'Feb',
-      value: 1469.5,
-    },
-    {
-      country: 'Online Store',
-      date: 'Mar',
-      value: 1521.7,
-    },
-    {
-      country: 'Online Store',
-      date: 'Apr',
-      value: 1615.9,
-    },
-    {
-      country: 'Online Store',
-      date: 'May',
-      value: 1703.7,
-    },
-    {
-      country: 'Online Store',
-      date: 'Jun',
-      value: 1767.8,
-    },
-    {
-      country: 'Online Store',
-      date: 'Jul',
-      value: 1806.2,
-    },
-    {
-      country: 'Online Store',
-      date: 'Aug',
-      value: 1903.5,
-    },
-    {
-      country: 'Online Store',
-      date: 'Sept',
-      value: 1986.6,
-    },
-    {
-      country: 'Online Store',
-      date: 'Oct',
-      value: 1952,
-    },
-    {
-      country: 'Online Store',
-      date: 'Nov',
-      value: 1910.4,
-    },
-    {
-      country: 'Online Store',
-      date: 'Dec',
-      value: 2015.8,
-    },
-    {
-      country: 'Facebook',
-      date: 'Jan',
-      value: 109.2,
-    },
-    {
-      country: 'Facebook',
-      date: 'Feb',
-      value: 115.7,
-    },
-    {
-      country: 'Facebook',
-      date: 'Mar',
-      value: 120.5,
-    },
-    {
-      country: 'Facebook',
-      date: 'Apr',
-      value: 128,
-    },
-    {
-      country: 'Facebook',
-      date: 'May',
-      value: 134.4,
-    },
-    {
-      country: 'Facebook',
-      date: 'Jun',
-      value: 142.2,
-    },
-    {
-      country: 'Facebook',
-      date: 'Jul',
-      value: 157.5,
-    },
-    {
-      country: 'Facebook',
-      date: 'Aug',
-      value: 169.5,
-    },
-    {
-      country: 'Facebook',
-      date: 'Sept',
-      value: 186.3,
-    },
-    {
-      country: 'Facebook',
-      date: 'Oct',
-      value: 195.5,
-    },
-    {
-      country: 'Facebook',
-      date: 'Nov',
-      value: 198,
-    },
-    {
-      country: 'Facebook',
-      date: 'Dec',
-      value: 211.7,
-    },
-  ];
-
-  const config = {
-    data,
-    xField: 'date',
-    yField: 'value',
-    seriesField: 'country',
-    slider: {
-      start: 0.1,
-      end: 0.9,
-    },
-  };
-
-  return <Area {...config} />;
 };
 
 const PRODUCTS_COLUMNS = [
@@ -389,6 +368,20 @@ export const DefaultDashboardPage = () => {
   );
   const [error, setError] = useState<ReactNode | null>(null);
   const [loading, setLoading] = useState(false);
+  const [filteredData, setFilteredData] = useState<MismatchesResponse[]>([]);
+
+  // Tab o'zgarganda filtrni qo'llash
+  useEffect(() => {
+    if (!mismatchesData?.results) return;
+
+    if (activeTab === 'all') {
+      setFilteredData(mismatchesData.results);
+    } else {
+      setFilteredData(
+        mismatchesData.results.filter((item) => item.rule.level === activeTab)
+      );
+    }
+  }, [activeTab, mismatchesData]);
 
   // pie 1
   useEffect(() => {
@@ -519,35 +512,6 @@ export const DefaultDashboardPage = () => {
           </Card>
         </Col>
 
-        {/* Graph */}
-        <Col xs={24} lg={12}>
-          <Card
-            title="Overall sales"
-            extra={
-              <Popover content="Total sales over period x" title="Total sales">
-                <Button icon={<QuestionOutlined />} {...POPOVER_BUTTON_PROPS} />
-              </Popover>
-            }
-            style={cardStyles}
-          >
-            <Flex vertical gap="middle">
-              <Space>
-                <Title level={3} style={{ margin: 0 }}>
-                  $ <CountUp end={24485.67} />
-                </Title>
-                <Tag color="green-inverse" icon={<ArrowUpOutlined />}>
-                  8.7%
-                </Tag>
-              </Space>
-              <SalesChart />
-            </Flex>
-          </Card>
-        </Col>
-
-        <Col xs={24} lg={12}>
-          <MarketingSocialStatsCard style={{ height: '100%' }} />
-        </Col>
-
         <Col span={24}>
           <Card
             title="Security Events"
@@ -575,10 +539,12 @@ export const DefaultDashboardPage = () => {
             </Tabs>
 
             <Table
-              dataSource={mismatchesData?.results || []}
+              dataSource={filteredData}
               columns={EVENT_COLUMNS}
               rowKey="id"
-              expandable={{ expandedRowRender }}
+              expandable={{
+                expandedRowRender: (record) => <ExpandedRow record={record} />,
+              }}
               className="overflow-scroll"
               loading={loading}
               pagination={{

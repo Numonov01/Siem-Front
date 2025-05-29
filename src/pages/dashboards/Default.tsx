@@ -11,7 +11,6 @@ import {
   Tag,
   TagProps,
 } from 'antd';
-import { Card, PageHeader } from '../../components';
 import {
   HomeOutlined,
   PieChartOutlined,
@@ -19,12 +18,10 @@ import {
   WarningOutlined,
 } from '@ant-design/icons';
 import { Helmet } from 'react-helmet-async';
-import { CSSProperties, ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
   fetchBarList,
-  fetchMismatchesRule,
   fetchMismatchesTable,
-  fetchMismatchesLog,
   fetchMismatchesChart,
 } from '../../service/default';
 import {
@@ -32,34 +29,13 @@ import {
   MismatchesItem,
   MismatchesLevelChart,
   MismatchesResponse,
-  SigmaRule,
 } from '../../types/default';
-import MitreAttackPieChart from './MitreAttackChart';
-import { fetchDeviceList } from '../../service/device_list';
 import { DeviceListData } from '../../types/device_list';
-import { ColumnsType } from 'antd/es/table';
-import { NetworkEvent } from '../../types/event_logs';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Legend,
-  ArcElement,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Legend,
-  ArcElement
-);
+import { Card, PageHeader } from '../../components';
+import { fetchDeviceList } from '../../service/device_list';
+import MitreAttackPieChart from './Charts/MitreAttackChart';
+import { MismatchesLevelLineChart } from './Charts/LineChart';
+import { SecurityEventsTable } from '../../components/dashboard/default/TabCard/SecurityEventsTable';
 
 const { TabPane } = Tabs;
 
@@ -90,194 +66,11 @@ const SECURITY_TABS = [
   },
 ];
 
-const EVENT_COLUMNS: ColumnsType<MismatchesItem> = [
-  {
-    title: 'Rule id',
-    dataIndex: ['rule', 'id'],
-    key: 'id',
-  },
-  {
-    title: 'Device Name',
-    dataIndex: 'device_name',
-    key: 'device_name',
-  },
-  {
-    title: 'Title',
-    dataIndex: ['rule', 'title'],
-    key: 'title',
-  },
-  {
-    title: 'Log id',
-    dataIndex: 'log_id',
-    key: 'log_id',
-  },
-  {
-    title: 'Level',
-    dataIndex: ['rule', 'level'],
-    key: 'level',
-    render: (_: string) => {
-      let color: TagProps['color'];
-
-      if (_ === 'low') {
-        color = 'cyan';
-      } else if (_ === 'medium') {
-        color = 'geekblue';
-      } else {
-        color = 'magenta';
-      }
-
-      return (
-        <Tag color={color} className="text-capitalize">
-          {_}
-        </Tag>
-      );
-    },
-  },
-];
-
-const ExpandedRow = ({ record }: { record: MismatchesItem }) => {
-  const [ruleData, setRuleData] = useState<SigmaRule | null>(null);
-  const [logData, setLogData] = useState<NetworkEvent | null>(null);
-  const [loading, setLoading] = useState({
-    rule: false,
-    log: false,
-  });
-  const [error, setError] = useState({
-    rule: null as ReactNode | null,
-    log: null as ReactNode | null,
-  });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading((prev) => ({ ...prev, rule: true }));
-        const rule = await fetchMismatchesRule(record.rule.id);
-        setRuleData(rule);
-        setError((prev) => ({ ...prev, rule: null }));
-      } catch (err) {
-        console.error('Error fetching rule:', err);
-        setError((prev) => ({
-          ...prev,
-          rule: err instanceof Error ? err.message : 'Failed to load rule data',
-        }));
-      } finally {
-        setLoading((prev) => ({ ...prev, rule: false }));
-      }
-
-      try {
-        setLoading((prev) => ({ ...prev, log: true }));
-        const log = await fetchMismatchesLog(record.log_id);
-        setLogData(log);
-        setError((prev) => ({ ...prev, log: null }));
-      } catch (err) {
-        console.error('Error fetching log:', err);
-        setError((prev) => ({
-          ...prev,
-          log: err instanceof Error ? err.message : 'Failed to load log data',
-        }));
-      } finally {
-        setLoading((prev) => ({ ...prev, log: false }));
-      }
-    };
-
-    fetchData();
-  }, [record.rule.id, record.log_id]);
-
-  const VERTICAL_TABLE_COLUMNS = [
-    {
-      title: 'Field',
-      dataIndex: 'field',
-      key: 'field',
-      width: '30%',
-      render: (text: string) => <strong>{text}</strong>,
-    },
-    {
-      title: 'Value',
-      dataIndex: 'value',
-      key: 'value',
-      width: '70%',
-      render: (value: unknown) => {
-        if (typeof value === 'object' && value !== null)
-          return JSON.stringify(value);
-        return String(value);
-      },
-    },
-  ];
-
-  const getRuleData = () => {
-    if (!ruleData) return [];
-
-    return [
-      { field: 'Title', value: ruleData.title },
-      { field: 'Description', value: ruleData.description },
-      { field: 'Status', value: ruleData.status },
-      { field: 'Level', value: ruleData.level },
-      { field: 'Tags', value: ruleData.tags.join(' => ') },
-      { field: 'References', value: ruleData.references.join(' => ') },
-      { field: 'Author', value: ruleData.author },
-      { field: 'Date', value: ruleData.date },
-    ];
-  };
-
-  const getLogData = () => {
-    if (!logData) return [];
-
-    return [
-      { field: 'Event ID', value: logData.EventId },
-      { field: 'User', value: logData.Event?.User },
-      { field: 'Image', value: logData.Event?.Image },
-      { field: 'Company', value: logData.Event?.Company },
-      { field: 'Command Line', value: logData.Event?.CommandLine },
-      { field: 'Parent Image', value: logData.Event?.ParentImage },
-      { field: 'Parent Command Line', value: logData.Event?.ParentCommandLine },
-      { field: 'Original File Name', value: logData.Event?.OriginalFileName },
-      { field: 'Integrity Level', value: logData.Event?.IntegrityLevel },
-      {
-        field: 'UTC Time',
-        value: logData.Event?.UtcTime
-          ? new Date(logData.Event.UtcTime).toLocaleString()
-          : null,
-      },
-    ];
-  };
-
-  return (
-    <Tabs defaultActiveKey="1">
-      <TabPane tab="Rule" key="1">
-        {error.rule && <Alert message={error.rule} type="error" showIcon />}
-        <Table
-          columns={VERTICAL_TABLE_COLUMNS}
-          dataSource={getRuleData()}
-          pagination={false}
-          bordered
-          showHeader={false}
-          rowKey="field"
-          loading={loading.rule}
-          locale={{ emptyText: loading.rule ? 'Loading...' : 'No data found' }}
-        />
-      </TabPane>
-      <TabPane tab="Log" key="2">
-        {error.log && <Alert message={error.log} type="error" showIcon />}
-        <Table
-          columns={VERTICAL_TABLE_COLUMNS}
-          dataSource={getLogData()}
-          pagination={false}
-          bordered
-          showHeader={false}
-          rowKey="field"
-          loading={loading.log}
-          locale={{ emptyText: loading.log ? 'Loading...' : 'No data found' }}
-        />
-      </TabPane>
-    </Tabs>
-  );
-};
-
 const POPOVER_BUTTON_PROPS: ButtonProps = {
   type: 'text',
 };
 
-const cardStyles: CSSProperties = {
+const cardStyles = {
   height: '100%',
 };
 
@@ -329,58 +122,6 @@ const PRODUCTS_COLUMNS = [
     },
   },
 ];
-
-const MismatchesLevelLineChart = ({ data }: { data: MismatchesLevelChart }) => {
-  const chartData = {
-    labels: data.labels,
-    datasets: data.datasets.map((dataset) => ({
-      label: dataset.label,
-      data: dataset.data,
-      borderColor:
-        dataset.label === 'High'
-          ? 'rgb(255, 99, 132)'
-          : dataset.label === 'Medium'
-            ? 'rgb(54, 162, 235)'
-            : 'rgb(75, 192, 192)',
-      backgroundColor:
-        dataset.label === 'High'
-          ? 'rgba(255, 99, 132, 0.5)'
-          : dataset.label === 'Medium'
-            ? 'rgba(54, 162, 235, 0.5)'
-            : 'rgba(75, 192, 192, 0.5)',
-      tension: 0.1,
-    })),
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Count',
-        },
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-      },
-    },
-  };
-
-  return <Line options={options} data={chartData} />;
-};
 
 export const DefaultDashboardPage = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -608,22 +349,7 @@ export const DefaultDashboardPage = () => {
               ))}
             </Tabs>
 
-            <Table
-              dataSource={filteredData}
-              columns={EVENT_COLUMNS}
-              rowKey="id"
-              expandable={{
-                expandedRowRender: (record) => <ExpandedRow record={record} />,
-              }}
-              className="overflow-scroll"
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                pageSizeOptions: ['10', '20', '50', '100'],
-              }}
-              locale={{ emptyText: loading ? 'Loading...' : 'No data found' }}
-            />
+            <SecurityEventsTable data={filteredData} loading={loading} />
           </Card>
         </Col>
       </Row>

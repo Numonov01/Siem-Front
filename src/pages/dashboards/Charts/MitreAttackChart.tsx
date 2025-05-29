@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pie } from '@ant-design/charts';
-import { BarData } from '../../types/default';
+import { BarData } from '../../../types/default';
 
 interface MitreAttackPieChartProps {
   data: BarData[];

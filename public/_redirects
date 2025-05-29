@@ -1,4 +1,5 @@
 /* /index.html 200
 
-/* http://13.60.91.11:8000/api/v1/auth/login/ 200
-/* http://13.60.91.11:8000/api/v1/auth/login 200
+
+/api/*  http://13.60.91.11:8000/:splat  200
+/api/*  http://13.60.91.11:8000/api/:splat  200

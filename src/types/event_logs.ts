@@ -31,7 +31,7 @@ export type EventData = {
   ProcessGuid: string;
   ProcessId: string;
   Image: string;
-  FileVersion: string;
+  FileVersion?: string;
   Description: string;
   Product: string;
   Company: string;
@@ -49,6 +49,7 @@ export type EventData = {
   ParentImage: string;
   ParentCommandLine: string;
   ParentUser: string;
+  id: string;
 };
 
 export type NetworkEvent = {

@@ -11,7 +11,10 @@ import { QuestionOutlined } from '@ant-design/icons';
 import { ReactNode, useEffect, useState } from 'react';
 import * as _ from 'lodash';
 import { fetchEventLogs } from '../../../../service/event_logs.ts';
-import { EventData } from '../../../../types/event_logs.ts';
+import {
+  EventData,
+  NetworkEventResponse,
+} from '../../../../types/event_logs.ts';
 
 const PARENT_TABLE_COLUMNS: TableColumnsType<{
   id: string;
@@ -145,7 +148,7 @@ type Props = {
 } & CardProps;
 
 export const CampaignsAdsCard = ({ error, ...others }: Props) => {
-  const [eventData, setEventData] = useState<EventData[]>([]);
+  const [eventData, setEventData] = useState<NetworkEventResponse[]>([]);
   const [groupedData, setGroupedData] = useState<
     { id: string; ad_source: string; events: EventData[] }[]
   >([]);

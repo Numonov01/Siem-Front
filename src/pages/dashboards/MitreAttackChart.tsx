@@ -7,7 +7,6 @@ interface MitreAttackPieChartProps {
 }
 
 const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
-  // Dastlabki ma'lumotni tayyorlash
   const processedData = data.map((item) => ({
     id: String(item.id),
     technique: item?.tag?.replace('attack.t', 'T') || 'Unknown',
@@ -20,7 +19,6 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
     value: number;
   };
 
-  // Texnikalarni guruhlash (har xil texnikalar bo‘yicha qiymatlarni jamlash)
   const groupedData = processedData.reduce((acc: GroupedDataItem[], curr) => {
     if (!curr.technique) return acc;
 
@@ -33,7 +31,6 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
     return acc;
   }, []);
 
-  // Grafik sozlamalari
   const config = {
     data: groupedData,
     angleField: 'value',
@@ -97,6 +94,7 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
     },
   };
 
+  /*@ts-ignore*/
   return <Pie {...config} style={{ height: '400px' }} />;
 };
 

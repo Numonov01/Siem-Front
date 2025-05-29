@@ -10,13 +10,13 @@ import {
   Tabs,
   Tag,
   TagProps,
-  Tooltip,
 } from 'antd';
 import { Card, PageHeader } from '../../components';
 import {
   HomeOutlined,
   PieChartOutlined,
   QuestionOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
 import { Helmet } from 'react-helmet-async';
 import { CSSProperties, ReactNode, useEffect, useState } from 'react';
@@ -29,6 +29,7 @@ import {
 } from '../../service/default';
 import {
   BarData,
+  MismatchesItem,
   MismatchesLevelChart,
   MismatchesResponse,
   SigmaRule,
@@ -50,7 +51,6 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
-// Register ChartJS components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -67,18 +67,26 @@ const SECURITY_TABS = [
   {
     key: 'all',
     label: 'All Events',
+    icon: HomeOutlined,
+    count: 0,
   },
   {
     key: 'high',
     label: 'High',
+    icon: WarningOutlined,
+    count: 0,
   },
   {
     key: 'medium',
     label: 'Medium',
+    icon: WarningOutlined,
+    count: 0,
   },
   {
     key: 'low',
     label: 'Low',
+    icon: WarningOutlined,
+    count: 0,
   },
 ];
 
@@ -127,7 +135,7 @@ const EVENT_COLUMNS: ColumnsType<MismatchesResponse> = [
   },
 ];
 
-const ExpandedRow = ({ record }: { record: MismatchesResponse }) => {
+const ExpandedRow = ({ record }: { record: MismatchesItem }) => {
   const [ruleData, setRuleData] = useState<SigmaRule | null>(null);
   const [logData, setLogData] = useState<NetworkEvent | null>(null);
   const [loading, setLoading] = useState({
@@ -173,7 +181,7 @@ const ExpandedRow = ({ record }: { record: MismatchesResponse }) => {
     };
 
     fetchData();
-  }, [record.log_id, record.rule.id]);
+  }, [record.rule.id, record.log_id]);
 
   const VERTICAL_TABLE_COLUMNS = [
     {
@@ -464,7 +472,7 @@ export const DefaultDashboardPage = () => {
       setLoading(true);
       try {
         const data = await fetchMismatchesChart();
-        setMismatchesChartData(data);
+        setMismatchesChartData(Array.isArray(data) ? data[0] ?? null : data);
       } catch (error) {
         console.error('Error fetching mismatches chart data:', error);
       } finally {

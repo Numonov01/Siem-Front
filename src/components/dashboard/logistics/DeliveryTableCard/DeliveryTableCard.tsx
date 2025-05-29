@@ -122,13 +122,13 @@ const EXPANDED_COLUMNS: ColumnsType<NetworkEvent> = [
     title: 'Command line',
     dataIndex: ['Event', 'CommandLine'],
     key: 'CommandLine',
-    render: (CommandLine: string) => (
-      <Tooltip title={CommandLine}>
-        {CommandLine.length > 30
-          ? `${CommandLine.substring(0, 30)}...`
-          : CommandLine}
-      </Tooltip>
-    ),
+    // render: (CommandLine: string) => (
+    //   <Tooltip title={CommandLine}>
+    //     {CommandLine.length > 30
+    //       ? `${CommandLine.substring(0, 30)}...`
+    //       : CommandLine}
+    //   </Tooltip>
+    // ),
   },
   {
     title: 'Logon id',

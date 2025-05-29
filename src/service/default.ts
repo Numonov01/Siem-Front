@@ -33,9 +33,11 @@ export const fetchMismatchesTable = async (): Promise<MismatchesResponse[]> => {
   }
 };
 
-export const fetchMismatchesLog = async (id: number): Promise<NetworkEvent> => {
+export const fetchMismatchesLog = async (
+  log_id: string
+): Promise<NetworkEvent> => {
   try {
-    const response = await api.get(`/agent/elastic/logs/${id}/`);
+    const response = await api.get(`/agent/elastic/logs/${log_id}/`);
     console.log(response.data);
     return response.data;
   } catch (error) {
@@ -44,7 +46,7 @@ export const fetchMismatchesLog = async (id: number): Promise<NetworkEvent> => {
   }
 };
 
-export const fetchMismatchesRule = async (id: number): Promise<SigmaRule> => {
+export const fetchMismatchesRule = async (id: string): Promise<SigmaRule> => {
   try {
     const response = await api.get(`/agent/sigma-rule/${id}/`);
     console.log(response.data);

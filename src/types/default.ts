@@ -4,24 +4,40 @@ export type BarData = {
   log_count: number;
 };
 
-interface Rule {
+// export interface MismatchesResponse {
+//   count: number;
+//   next: string | null;
+//   previous: string | null;
+//   results: {
+//     id: number;
+//     log_id: string;
+//     device_name: string;
+//     rule: {
+//       id: string;
+//       title: string;
+//       level: string;
+//     };
+//   }[];
+// }
+
+export interface Rule {
   id: string;
   title: string;
-  level: 'high' | 'medium' | 'low';
+  level: string;
 }
 
-interface MismatchResult {
+export interface MismatchesItem {
   id: number;
-  device_name: string;
   log_id: string;
+  device_name: string;
   rule: Rule;
 }
 
 export interface MismatchesResponse {
   count: number;
-  next: string;
-  previous: string;
-  results: MismatchResult[];
+  next: string | null;
+  previous: string | null;
+  results: MismatchesItem[];
 }
 
 export type SigmaRule = {
@@ -49,10 +65,11 @@ export type SigmaRule = {
   level: string;
   filename: string;
 };
+
 export type MismatchesLevelChart = {
-  labels: string[]; // ["2025-05-28 11:00", "2025-05-28 13:00"]
+  labels: string[];
   datasets: {
-    label: string; // "Low", "Medium", "High"
+    label: string;
     data: number[];
   }[];
 };

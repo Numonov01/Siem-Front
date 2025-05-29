@@ -90,7 +90,7 @@ const SECURITY_TABS = [
   },
 ];
 
-const EVENT_COLUMNS: ColumnsType<MismatchesResponse> = [
+const EVENT_COLUMNS: ColumnsType<MismatchesItem> = [
   {
     title: 'Rule id',
     dataIndex: ['rule', 'id'],
@@ -386,14 +386,17 @@ export const DefaultDashboardPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [barData, setBarData] = useState<BarData[]>([]);
   const [deviceData, setDeviceData] = useState<DeviceListData[]>([]);
-  const [mismatchesData, setMismatchesData] = useState<MismatchesResponse[]>(
-    []
-  );
+  const [mismatchesData, setMismatchesData] = useState<MismatchesResponse>({
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  });
+  const [filteredData, setFilteredData] = useState<MismatchesItem[]>([]);
   const [mismatchesChartData, setMismatchesChartData] =
     useState<MismatchesLevelChart | null>(null);
   const [error, setError] = useState<ReactNode | null>(null);
   const [loading, setLoading] = useState(false);
-  const [filteredData, setFilteredData] = useState<MismatchesResponse[]>([]);
 
   useEffect(() => {
     if (!mismatchesData?.results) return;
@@ -451,7 +454,11 @@ export const DefaultDashboardPage = () => {
       setLoading(true);
       try {
         const data = await fetchMismatchesTable();
-        setMismatchesData(data);
+        setMismatchesData(
+          Array.isArray(data)
+            ? data[0] ?? { count: 0, next: null, previous: null, results: [] }
+            : data
+        );
         setError(null);
       } catch (error) {
         console.error('Fetch error:', error);

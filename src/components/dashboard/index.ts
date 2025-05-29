@@ -22,7 +22,6 @@ export {
   VisitorsChartCard,
   SocialStatsCard as MarketingSocialStatsCard,
   CampaignsActivity,
-  CampaignsAdsCard,
   AudienceLocationChart,
 } from './marketing';
 export {

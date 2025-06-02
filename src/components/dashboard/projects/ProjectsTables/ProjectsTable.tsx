@@ -9,16 +9,12 @@ import {
   Typography,
 } from 'antd';
 import { DeviceListData } from '../../../../types/device_list';
-import {
-  AppstoreOutlined,
-  ClusterOutlined,
-  FileTextOutlined,
-} from '@ant-design/icons';
+import { AppstoreOutlined, FileTextOutlined } from '@ant-design/icons';
 import { ColumnType } from 'antd/es/table';
 
 const COLUMNS = (
-  onAppListClick: (deviceId: number) => void,
-  onTreeClick: (deviceId: number) => void
+  onAppListClick: (deviceId: number) => void
+  // onTreeClick: (deviceId: number) => void
 ): ColumnType<DeviceListData>[] => [
   {
     title: 'Name',
@@ -117,7 +113,7 @@ const COLUMNS = (
           </Button>
         </Tooltip>
 
-        <Tooltip title="View process tree">
+        {/* <Tooltip title="View process tree">
           <Button
             size="small"
             icon={<ClusterOutlined />}
@@ -132,7 +128,7 @@ const COLUMNS = (
           >
             Tree
           </Button>
-        </Tooltip>
+        </Tooltip> */}
       </Space>
     ),
   },
@@ -149,13 +145,13 @@ export const DeviceListTable = ({
   data,
   loading,
   onAppListClick,
-  onTreeClick,
+  // onTreeClick,
   ...others
 }: Props) => {
   return (
     <Table
       dataSource={data}
-      columns={COLUMNS(onAppListClick, onTreeClick)}
+      columns={COLUMNS(onAppListClick)}
       className="overflow-scroll"
       loading={loading}
       rowKey="pk"

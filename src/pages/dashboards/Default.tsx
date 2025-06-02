@@ -129,8 +129,8 @@ export const DefaultDashboardPage = () => {
   const [deviceData, setDeviceData] = useState<DeviceListData[]>([]);
   const [mismatchesData, setMismatchesData] = useState<MismatchesResponse>({
     count: 0,
-    next: null,
-    previous: null,
+    next: '',
+    previous: '',
     results: [],
   });
   const [filteredData, setFilteredData] = useState<MismatchesItem[]>([]);
@@ -139,9 +139,41 @@ export const DefaultDashboardPage = () => {
   const [error, setError] = useState<ReactNode | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!mismatchesData?.results) return;
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
 
+  // pagination
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchMismatchesTable(
+          pagination.current,
+          pagination.pageSize
+        );
+        setMismatchesData(
+          Array.isArray(data)
+            ? data[0] ?? { count: 0, next: null, previous: null, results: [] }
+            : data
+        );
+        setError(null);
+      } catch (error) {
+        console.error('Fetch error:', error);
+        setError(
+          error instanceof Error ? error.message : 'Failed to load data'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [pagination]);
+
+  // filter
+  useEffect(() => {
     if (activeTab === 'all') {
       setFilteredData(mismatchesData.results);
     } else {
@@ -150,6 +182,13 @@ export const DefaultDashboardPage = () => {
       );
     }
   }, [activeTab, mismatchesData]);
+
+  const handlePageChange = (page: number, pageSize: number) => {
+    setPagination({
+      current: page,
+      pageSize: pageSize,
+    });
+  };
 
   // pie 1
   useEffect(() => {
@@ -349,7 +388,17 @@ export const DefaultDashboardPage = () => {
               ))}
             </Tabs>
 
-            <SecurityEventsTable data={filteredData} loading={loading} />
+            <SecurityEventsTable
+              data={{
+                count: mismatchesData.count,
+                results: filteredData,
+                next: mismatchesData.next,
+                previous: mismatchesData.previous,
+              }}
+              loading={loading}
+              onPageChange={handlePageChange}
+              currentPage={pagination.current}
+            />
           </Card>
         </Col>
       </Row>

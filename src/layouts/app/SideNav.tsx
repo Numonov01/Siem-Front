@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ConfigProvider, Layout, Menu, MenuProps, SiderProps } from 'antd';
 import {
-  InfoCircleOutlined,
   LaptopOutlined,
   OrderedListOutlined,
   PieChartOutlined,
 } from '@ant-design/icons';
 import { Logo } from '../../components';
 import { Link, useLocation } from 'react-router-dom';
-import { PATH_DASHBOARD, PATH_LANDING, PATH_SITEMAP } from '../../constants';
+import { PATH_DASHBOARD, PATH_LANDING } from '../../constants';
 import { COLOR } from '../../App.tsx';
 
 const { Sider } = Layout;
@@ -74,11 +73,11 @@ const items: MenuProps['items'] = [
   //   'about',
   //   <BranchesOutlined />
   // ),
-  getItem(
-    <Link to={PATH_SITEMAP.root}>Rules</Link>,
-    'sitemap',
-    <InfoCircleOutlined />
-  ),
+  // getItem(
+  //   <Link to={PATH_SITEMAP.root}>Rules</Link>,
+  //   'sitemap',
+  //   <InfoCircleOutlined />
+  // ),
 
   // getItem('Pages', 'pages', null, [], 'group'),
 

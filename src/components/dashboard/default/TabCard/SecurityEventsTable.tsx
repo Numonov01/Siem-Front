@@ -1,7 +1,7 @@
 import { Table, Tag, TagProps } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { ExpandedRow } from './ExpandedRow';
-import { MismatchesItem } from '../../../../types/default';
+import { MismatchesItem, MismatchesResponse } from '../../../../types/default';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const EVENT_COLUMNS: ColumnsType<MismatchesItem> = [
@@ -49,16 +49,22 @@ export const EVENT_COLUMNS: ColumnsType<MismatchesItem> = [
   },
 ];
 
+interface SecurityEventsTableProps {
+  data: MismatchesResponse;
+  loading: boolean;
+  onPageChange?: (page: number, pageSize: number) => void;
+  currentPage?: number;
+}
+
 export const SecurityEventsTable = ({
   data,
   loading,
-}: {
-  data: MismatchesItem[];
-  loading: boolean;
-}) => {
+  onPageChange,
+  currentPage = 1,
+}: SecurityEventsTableProps) => {
   return (
     <Table
-      dataSource={data}
+      dataSource={data.results}
       columns={EVENT_COLUMNS}
       rowKey="id"
       expandable={{
@@ -67,9 +73,12 @@ export const SecurityEventsTable = ({
       className="overflow-scroll"
       loading={loading}
       pagination={{
+        current: currentPage,
         pageSize: 10,
+        total: data.count,
         showSizeChanger: true,
         pageSizeOptions: ['10', '20', '50', '100'],
+        onChange: onPageChange,
       }}
       locale={{ emptyText: loading ? 'Loading...' : 'No data found' }}
     />

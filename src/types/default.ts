@@ -4,21 +4,71 @@ export type BarData = {
   log_count: number;
 };
 
-// export interface MismatchesResponse {
-//   count: number;
-//   next: string | null;
-//   previous: string | null;
-//   results: {
-//     id: number;
-//     log_id: string;
-//     device_name: string;
-//     rule: {
-//       id: string;
-//       title: string;
-//       level: string;
-//     };
-//   }[];
-// }
+interface EventDescriptor {
+  Id: number;
+  Version: number;
+  Channel: number;
+  Level: number;
+  Opcode: number;
+  Task: number;
+  Keyword: string;
+}
+
+interface EventHeader {
+  Size: number;
+  HeaderType: number;
+  Flags: number;
+  EventProperty: number;
+  ThreadId: number;
+  ProcessId: number;
+  TimeStamp: number;
+  ProviderId: string;
+  EventDescriptor: EventDescriptor;
+  KernelTime: number;
+  UserTime: number;
+  ActivityId: string;
+}
+
+interface Event {
+  EventHeader: EventHeader;
+  'Task Name': string;
+  RuleName: string;
+  UtcTime: string;
+  ProcessGuid: string;
+  ProcessId: string;
+  Image: string;
+  FileVersion: string;
+  Description: string;
+  Product: string;
+  Company: string;
+  OriginalFileName: string;
+  CommandLine: string;
+  CurrentDirectory: string;
+  User: string;
+  LogonGuid: string;
+  LogonId: string;
+  TerminalSessionId: number;
+  IntegrityLevel: string;
+  Hashes: string;
+  ParentProcessGuid: string;
+  ParentProcessId: string;
+  ParentImage: string;
+  ParentCommandLine: string;
+  ParentUser: string;
+}
+
+interface Log {
+  id: string;
+  EventId: number;
+  Event: Event;
+}
+
+export interface RootObject {
+  tag_id: number;
+  tag: string;
+  log_count: number;
+  logs: Log[];
+}
 
 export interface Rule {
   id: string;

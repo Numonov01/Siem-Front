@@ -23,6 +23,8 @@ import {
   fetchBarList,
   fetchMismatchesTable,
   fetchMismatchesChart,
+  DeviceRiskBar,
+  fetchBarRiskList,
 } from '../../service/default';
 import {
   BarData,
@@ -36,6 +38,9 @@ import { fetchDeviceList } from '../../service/device_list';
 import MitreAttackPieChart from './Charts/MitreAttackChart';
 import { MismatchesLevelLineChart } from './Charts/LineChart';
 import { SecurityEventsTable } from '../../components/dashboard/default/TabCard/SecurityEventsTable';
+import MitreAttackTable from './Charts/MitreAttackTable';
+import RiskTable from './Charts/RiskTable';
+import RiskPieChart from './Charts/RiskChart';
 
 const { TabPane } = Tabs;
 
@@ -138,11 +143,26 @@ export const DefaultDashboardPage = () => {
     useState<MismatchesLevelChart | null>(null);
   const [error, setError] = useState<ReactNode | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedTechnique, setSelectedTechnique] = useState<string | null>(
+    null
+  );
+  const [barRiskData, setRiskBarData] = useState<DeviceRiskBar[]>([]);
+  const [selectedRiskTechnique, setSelectedRiskTechnique] = useState<
+    string | null
+  >(null);
 
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
   });
+
+  const handleTechniqueClick = (technique: string) => {
+    setSelectedTechnique(technique);
+  };
+
+  const handleTechniqueRiskClick = (technique: string) => {
+    setSelectedRiskTechnique(technique);
+  };
 
   // pagination
   useEffect(() => {
@@ -197,6 +217,23 @@ export const DefaultDashboardPage = () => {
       try {
         const data = await fetchBarList();
         setBarData(data);
+      } catch (error) {
+        console.error("Ma'lumotlarni yuklashda xato:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // pie 2
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchBarRiskList();
+        setRiskBarData(data);
       } catch (error) {
         console.error("Ma'lumotlarni yuklashda xato:", error);
       } finally {
@@ -336,11 +373,50 @@ export const DefaultDashboardPage = () => {
             style={cardStyles}
             loading={loading}
           >
-            <MitreAttackPieChart data={barData} />
+            <MitreAttackPieChart
+              data={barData}
+              onTechniqueClick={handleTechniqueClick}
+            />
           </Card>
         </Col>
 
         <Col xs={24} lg={12}>
+          <Card
+            title="Risk Distribution by Device"
+            extra={
+              <Popover
+                content="Risk distribution across devices"
+                title="Techniques"
+              >
+                <Button icon={<QuestionOutlined />} {...POPOVER_BUTTON_PROPS} />
+              </Popover>
+            }
+            style={cardStyles}
+            loading={loading}
+          >
+            <RiskPieChart
+              data={barRiskData}
+              onTechniqueClick={handleTechniqueRiskClick}
+            />
+          </Card>
+        </Col>
+
+        {selectedTechnique && (
+          <Col xs={24} lg={24}>
+            <MitreAttackTable technique={selectedTechnique} barData={barData} />
+          </Col>
+        )}
+
+        {selectedRiskTechnique && (
+          <Col xs={24} lg={24}>
+            <RiskTable
+              technique={selectedRiskTechnique}
+              barRiskData={barRiskData}
+            />
+          </Col>
+        )}
+
+        <Col xs={24} lg={24}>
           <Card
             title="Mismatches Level Trend"
             extra={

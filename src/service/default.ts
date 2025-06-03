@@ -6,6 +6,7 @@ import {
   SigmaRule,
 } from '../types/default';
 import { NetworkEvent } from '../types/event_logs';
+import { LogData } from '../types/default_chart';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -89,7 +90,7 @@ export const fetchBarList = async (): Promise<BarData[]> => {
   }
 };
 
-export const fetchBarListTable = async (id: number): Promise<NetworkEvent> => {
+export const fetchBarListTable = async (id: number): Promise<LogData> => {
   try {
     const response = await api.get(`/elastic/mitra-tags/${id}/`);
     console.log(response.data);
@@ -99,3 +100,41 @@ export const fetchBarListTable = async (id: number): Promise<NetworkEvent> => {
     throw error;
   }
 };
+
+export const fetchBarRiskList = async (): Promise<DeviceRiskBar[]> => {
+  try {
+    const response = await api.get('/elastic/device-risk-summary/');
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching device list:', error);
+    throw error;
+  }
+};
+
+export const fetchBarRiskListTable = async (
+  id: number
+): Promise<DeviceRiskList> => {
+  try {
+    const response = await api.get(`/elastic/device-risk-detail/${id}/`);
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching device data:', error);
+    throw error;
+  }
+};
+
+export interface DeviceRiskBar {
+  device_id: number;
+  device_name: string;
+  total_risk: number;
+}
+
+export interface DeviceRiskList {
+  id: number;
+  risk_ball: number;
+  threat_indicator: string;
+  example: string;
+  created_at: string;
+}

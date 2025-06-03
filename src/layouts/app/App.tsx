@@ -21,6 +21,7 @@ import {
   QuestionOutlined,
   SettingOutlined,
   UserOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons';
 import {
   CSSTransition,
@@ -33,6 +34,7 @@ import HeaderNav from './HeaderNav.tsx';
 import FooterNav from './FooterNav.tsx';
 import { NProgress } from '../../components';
 import { PATH_LANDING } from '../../constants';
+import { useTranslation } from './TranslationContext.tsx';
 
 const { Content } = Layout;
 
@@ -48,25 +50,26 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const [collapsed, setCollapsed] = useState(true);
   const [navFill, setNavFill] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { setLanguage, t, loading } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const nodeRef = useRef(null);
   const floatBtnRef = useRef(null);
 
-  const items: MenuProps['items'] = [
+  const menuItems: MenuProps['items'] = [
     {
       key: 'user-profile-link',
-      label: 'profile',
+      label: t('Profile'),
       icon: <UserOutlined />,
     },
     {
       key: 'user-settings-link',
-      label: 'settings',
+      label: t('Settings'),
       icon: <SettingOutlined />,
     },
     {
       key: 'user-help-link',
-      label: 'help center',
+      label: t('Help Center'),
       icon: <QuestionOutlined />,
     },
     {
@@ -74,13 +77,13 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     },
     {
       key: 'user-logout-link',
-      label: 'logout',
+      label: t('Logout'),
       icon: <LogoutOutlined />,
       danger: true,
       onClick: () => {
         message.open({
           type: 'loading',
-          content: 'signing you out',
+          content: t('Signing you out'),
         });
 
         setTimeout(() => {
@@ -106,9 +109,17 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const changeLanguage = (lang: 'en' | 'uz' | 'ru') => {
+    setLanguage(lang);
+  };
+
+  const sidebarTooltip = collapsed
+    ? t('Expand Sidebar')
+    : t('Collapse Sidebar');
+
   return (
     <>
-      <NProgress isAnimating={isLoading} key={location.key} />
+      <NProgress isAnimating={isLoading || loading} key={location.key} />
       <Layout
         style={{
           minHeight: '100vh',
@@ -159,7 +170,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             }}
           >
             <Flex align="center">
-              <Tooltip title={`${collapsed ? 'Expand' : 'Collapse'} Sidebar`}>
+              <Tooltip title={sidebarTooltip}>
                 <Button
                   type="text"
                   icon={
@@ -174,7 +185,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                 />
               </Tooltip>
               <Input.Search
-                placeholder="search"
+                placeholder={t('Search')}
                 style={{
                   width: isMobile ? '100%' : 400,
                   marginLeft: isMobile ? 0 : '.5rem',
@@ -183,17 +194,40 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               />
             </Flex>
             <Flex align="center" gap="small">
-              <Tooltip title="Apps">
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'en',
+                      label: 'English',
+                      onClick: () => changeLanguage('en'),
+                    },
+                    {
+                      key: 'uz',
+                      label: 'Oʻzbekcha',
+                      onClick: () => changeLanguage('uz'),
+                    },
+                    {
+                      key: 'ru',
+                      label: 'Русский',
+                      onClick: () => changeLanguage('ru'),
+                    },
+                  ],
+                }}
+              >
+                <Button icon={<GlobalOutlined />} type="text" size="large" />
+              </Dropdown>
+              <Tooltip title={t('Apps')}>
                 <Button icon={<AppstoreOutlined />} type="text" size="large" />
               </Tooltip>
-              <Tooltip title="Messages">
+              <Tooltip title={t('Messages')}>
                 <Button icon={<MessageOutlined />} type="text" size="large" />
               </Tooltip>
-              <Dropdown menu={{ items }} trigger={['click']}>
+              <Dropdown menu={{ items: menuItems }} trigger={['click']}>
                 <Flex>
                   <img
                     src="/jujutsu.jpg"
-                    alt="user profile photo"
+                    alt={t('User profile photo')}
                     height={36}
                     width={36}
                     style={{ borderRadius, objectFit: 'cover' }}
@@ -224,11 +258,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                     <div
                       ref={nodeRef}
                       style={{
-                        // backgroundColor: '#fff',
-                        // borderRadius: borderRadius,
                         padding: 24,
                         minHeight: '100%',
-                        // boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                       }}
                     >
                       {children}

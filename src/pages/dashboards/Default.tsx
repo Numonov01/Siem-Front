@@ -36,6 +36,7 @@ import { fetchDeviceList } from '../../service/device_list';
 import MitreAttackPieChart from './Charts/MitreAttackChart';
 import { MismatchesLevelLineChart } from './Charts/LineChart';
 import { SecurityEventsTable } from '../../components/dashboard/default/TabCard/SecurityEventsTable';
+import MitreAttackTable from './Charts/MitreAttackTable';
 
 const { TabPane } = Tabs;
 
@@ -138,11 +139,114 @@ export const DefaultDashboardPage = () => {
     useState<MismatchesLevelChart | null>(null);
   const [error, setError] = useState<ReactNode | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedTechnique, setSelectedTechnique] = useState<string | null>(
+    null
+  );
+  // const [mitreTableData, setMitreTableData] = useState<TransformedLogItem[]>(
+  //   []
+  // );
+  // const [selectedTechnique, setSelectedTechnique] = useState<string | null>(
+  //   null
+  // );
+  // const [mitreTableLoading, setMitreTableLoading] = useState(false);
+  // const [mitreTableError, setMitreTableError] = useState<string | null>(null);
 
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
   });
+
+  // MITRE ATT&CK details
+  // const mitreTableColumns = [
+  //   {
+  //     title: 'ID',
+  //     dataIndex: 'id',
+  //     key: 'id',
+  //   },
+  //   {
+  //     title: 'Event ID',
+  //     dataIndex: 'EventId',
+  //     key: 'EventId',
+  //   },
+  //   {
+  //     title: 'Process ID',
+  //     dataIndex: ['Event', 'ProcessId'],
+  //     key: 'ProcessId',
+  //   },
+  //   {
+  //     title: 'File Version',
+  //     dataIndex: ['Event', 'FileVersion'],
+  //     key: 'FileVersion',
+  //   },
+  //   {
+  //     title: 'Logon Id',
+  //     dataIndex: ['Event', 'LogonId'],
+  //     key: 'LogonId',
+  //   },
+  //   {
+  //     title: 'UTC Time',
+  //     dataIndex: ['Event', 'UtcTime'],
+  //     key: 'UtcTime',
+  //     render: (date: string) => {
+  //       if (!date || date === 'N/A') return 'N/A';
+  //       try {
+  //         const originalDate = new Date(date);
+  //         const adjustedDate = new Date(
+  //           originalDate.getTime() + 5 * 60 * 60 * 1000
+  //         );
+  //         return adjustedDate.toLocaleString();
+  //       } catch (e) {
+  //         console.error('Error parsing date:', date);
+  //         return 'Invalid Date';
+  //       }
+  //     },
+  //   },
+  // ];
+
+  // const handleTechniqueClick = async (technique: string) => {
+  //   setSelectedTechnique(technique);
+  //   setMitreTableLoading(true);
+  //   setMitreTableError(null);
+
+  //   try {
+  //     const items = barData.filter(
+  //       (item) => item?.tag?.replace('attack.t', 'T') === technique
+  //     );
+
+  //     const transformLogItem = (log: LogItem): TransformedLogItem => {
+  //       return {
+  //         id: log.id,
+  //         EventId: log.EventId,
+  //         Event: {
+  //           ...log.Event,
+  //           ProcessId: log.Event?.ProcessId || 'N/A',
+  //           FileVersion: log.Event?.FileVersion || 'N/A',
+  //           LogonId: log.Event?.LogonId || 'N/A',
+  //           UtcTime: log.Event?.UtcTime || 'N/A',
+  //         },
+  //       };
+  //     };
+
+  //     const detailedData = await Promise.all(
+  //       items.map(async (item) => {
+  //         const logData = await fetchBarListTable(item.id);
+  //         return logData.logs.map(transformLogItem);
+  //       })
+  //     );
+
+  //     const flattenedData = detailedData.flat();
+  //     setMitreTableData(flattenedData);
+  //   } catch (err) {
+  //     console.error('Error fetching table data:', err);
+  //     setMitreTableError('Failed to load detailed data. Please try again.');
+  //   } finally {
+  //     setMitreTableLoading(false);
+  //   }
+  // };
+
+  const handleTechniqueClick = (technique: string) => {
+    setSelectedTechnique(technique);
+  };
 
   // pagination
   useEffect(() => {
@@ -336,11 +440,20 @@ export const DefaultDashboardPage = () => {
             style={cardStyles}
             loading={loading}
           >
-            <MitreAttackPieChart data={barData} />
+            <MitreAttackPieChart
+              data={barData}
+              onTechniqueClick={handleTechniqueClick}
+            />
           </Card>
         </Col>
 
-        <Col xs={24} lg={12}>
+        {selectedTechnique && (
+          <Col xs={24} lg={24}>
+            <MitreAttackTable technique={selectedTechnique} barData={barData} />
+          </Col>
+        )}
+
+        <Col xs={24} lg={32}>
           <Card
             title="Mismatches Level Trend"
             extra={

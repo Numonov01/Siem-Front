@@ -1,25 +1,30 @@
+// src/pages/dashboard/default/Charts/MitreAttackPieChart.tsx
 import React from 'react';
-import { Pie } from '@ant-design/charts';
+import { Pie, PieConfig } from '@ant-design/charts';
 import { BarData } from '../../../types/default';
+
+interface PieDataItem {
+  id: string;
+  technique: string;
+  value: number;
+}
 
 interface MitreAttackPieChartProps {
   data: BarData[];
+  onTechniqueClick: (technique: string) => void;
 }
 
-const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
-  const processedData = data.map((item) => ({
+const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({
+  data,
+  onTechniqueClick,
+}) => {
+  const processedData: PieDataItem[] = data.map((item) => ({
     id: String(item.id),
     technique: item?.tag?.replace('attack.t', 'T') || 'Unknown',
     value: item.log_count,
   }));
 
-  type GroupedDataItem = {
-    id: string;
-    technique: string;
-    value: number;
-  };
-
-  const groupedData = processedData.reduce((acc: GroupedDataItem[], curr) => {
+  const groupedData = processedData.reduce((acc: PieDataItem[], curr) => {
     if (!curr.technique) return acc;
 
     const existing = acc.find((item) => item.technique === curr.technique);
@@ -31,7 +36,7 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
     return acc;
   }, []);
 
-  const config = {
+  const pieConfig: PieConfig = {
     data: groupedData,
     angleField: 'value',
     colorField: 'technique',
@@ -44,7 +49,8 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
       position: 'right',
     },
     tooltip: {
-      formatter: (datum: GroupedDataItem) => ({
+      fields: ['technique', 'value'],
+      formatter: (datum: PieDataItem) => ({
         name: datum.technique,
         value: datum.value,
       }),
@@ -62,11 +68,10 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
         content: 'MITRE\nATT&CK',
       },
     },
-    color: (datum: GroupedDataItem) => {
+    color: (datum: PieDataItem) => {
       const tech = datum.technique || '';
       const num = parseInt(tech.replace(/\D/g, '')) || 0;
 
-      // Ranglar ro'yxati
       const colors = [
         '#FF6B6B',
         '#4ECDC4',
@@ -92,10 +97,17 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({ data }) => {
 
       return colors[num % colors.length];
     },
+    onReady: (plot) => {
+      plot.on('element:click', (event: { data: { data: PieDataItem } }) => {
+        const technique = event.data?.data?.technique;
+        if (technique) {
+          onTechniqueClick(technique);
+        }
+      });
+    },
   };
 
-  /*@ts-ignore*/
-  return <Pie {...config} style={{ height: '400px' }} />;
+  return <Pie {...pieConfig} style={{ height: '400px' }} />;
 };
 
 export default MitreAttackPieChart;

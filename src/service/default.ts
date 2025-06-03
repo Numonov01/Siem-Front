@@ -6,6 +6,7 @@ import {
   SigmaRule,
 } from '../types/default';
 import { NetworkEvent } from '../types/event_logs';
+import { LogData } from '../types/default_chart';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -100,68 +101,40 @@ export const fetchBarListTable = async (id: number): Promise<LogData> => {
   }
 };
 
-export type LogData = {
-  tag_id: number;
-  tag: string;
-  log_count: number;
-  logs: LogItem[];
+export const fetchBarRiskList = async (): Promise<DeviceRiskBar[]> => {
+  try {
+    const response = await api.get('/elastic/device-risk-summary/');
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching device list:', error);
+    throw error;
+  }
 };
 
-export type LogItem = {
-  id: string;
-  EventId: number;
-  Event: EventDetails;
+export const fetchBarRiskListTable = async (
+  id: number
+): Promise<DeviceRiskList> => {
+  try {
+    const response = await api.get(`/elastic/device-risk-detail/${id}/`);
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching device data:', error);
+    throw error;
+  }
 };
 
-export type EventDetails = {
-  EventHeader: EventHeader;
-  'Task Name': string;
-  RuleName: string;
-  UtcTime: string;
-  ProcessGuid: string;
-  ProcessId: string;
-  Image: string;
-  FileVersion: string;
-  Description: string;
-  Product: string;
-  Company: string;
-  OriginalFileName: string;
-  CommandLine: string;
-  CurrentDirectory: string;
-  User: string;
-  LogonGuid: string;
-  LogonId: string;
-  TerminalSessionId: number;
-  IntegrityLevel: string;
-  Hashes: string;
-  ParentProcessGuid: string;
-  ParentProcessId: string;
-  ParentImage: string;
-  ParentCommandLine: string;
-  ParentUser: string;
-};
+export interface DeviceRiskBar {
+  device_id: number;
+  device_name: string;
+  total_risk: number;
+}
 
-export type EventHeader = {
-  Size: number;
-  HeaderType: number;
-  Flags: number;
-  EventProperty: number;
-  ThreadId: number;
-  ProcessId: number;
-  TimeStamp: number;
-  ProviderId: string;
-  EventDescriptor: EventDescriptor;
-  KernelTime: number;
-  UserTime: number;
-  ActivityId: string;
-};
-
-export type EventDescriptor = {
-  Id: number;
-  Version: number;
-  Channel: number;
-  Level: number;
-  Opcode: number;
-  Task: number;
-  Keyword: string;
-};
+export interface DeviceRiskList {
+  id: number;
+  risk_ball: number;
+  threat_indicator: string;
+  example: string;
+  created_at: string;
+}

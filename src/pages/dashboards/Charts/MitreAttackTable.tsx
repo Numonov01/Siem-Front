@@ -1,7 +1,8 @@
 import React from 'react';
 import { Table, Card, Alert } from 'antd';
-import { fetchBarListTable, LogItem } from '../../../service/default';
+import { fetchBarListTable } from '../../../service/default';
 import { BarData } from '../../../types/default';
+import { LogItem } from '../../../types/default_chart';
 
 interface TransformedLogItem {
   id: string;
@@ -10,6 +11,7 @@ interface TransformedLogItem {
     ProcessId: string;
     LogonId: string;
     FileVersion: string;
+    User: string;
     UtcTime: string;
   };
 }
@@ -28,16 +30,22 @@ const MitreAttackTable: React.FC<MitreAttackTableProps> = ({
   const [error, setError] = React.useState<string | null>(null);
 
   const columns = [
+    // {
+    //   title: 'ID',
+    //   dataIndex: 'id',
+    //   key: 'id',
+    // },
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
+      title: 'User',
+      dataIndex: ['Event', 'User'],
+      key: 'User',
     },
     {
       title: 'Event ID',
       dataIndex: 'EventId',
       key: 'EventId',
     },
+
     {
       title: 'Process ID',
       dataIndex: ['Event', 'ProcessId'],
@@ -91,6 +99,7 @@ const MitreAttackTable: React.FC<MitreAttackTableProps> = ({
             FileVersion: log.Event?.FileVersion || 'N/A',
             LogonId: log.Event?.LogonId || 'N/A',
             UtcTime: log.Event?.UtcTime || 'N/A',
+            User: log.Event?.User || 'N/A',
           },
         });
 

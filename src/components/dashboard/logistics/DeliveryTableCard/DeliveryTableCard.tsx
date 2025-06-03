@@ -38,15 +38,20 @@ const BASIC_COLUMNS: ColumnsType<NetworkEvent> = [
   //   key: 'RuleName',
   // },
   {
+    title: 'User',
+    dataIndex: ['Event', 'User'],
+    key: 'User',
+  },
+  {
     title: 'Time stamp',
     dataIndex: ['Event', 'EventHeader', 'TimeStamp'],
     key: 'TimeStamp',
   },
-  {
-    title: 'Parent user',
-    dataIndex: ['Event', 'ParentUser'],
-    key: 'ParentUser',
-  },
+  // {
+  //   title: 'Parent user',
+  //   dataIndex: ['Event', 'ParentUser'],
+  //   key: 'ParentUser',
+  // },
   {
     title: 'Thread id',
     dataIndex: ['Event', 'EventHeader', 'ThreadId'],

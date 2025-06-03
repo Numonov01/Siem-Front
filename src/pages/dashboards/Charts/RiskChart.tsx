@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pie, PieConfig } from '@ant-design/charts';
-import { BarData } from '../../../types/default';
+import { DeviceRiskBar } from '../../../service/default';
 
 interface PieDataItem {
   id: string;
@@ -8,19 +8,19 @@ interface PieDataItem {
   value: number;
 }
 
-interface MitreAttackPieChartProps {
-  data: BarData[];
+interface RiskPieChartProps {
+  data: DeviceRiskBar[];
   onTechniqueClick: (technique: string) => void;
 }
 
-const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({
+const RiskPieChart: React.FC<RiskPieChartProps> = ({
   data,
   onTechniqueClick,
 }) => {
   const processedData: PieDataItem[] = data.map((item) => ({
-    id: String(item.id),
-    technique: item?.tag?.replace('attack.t', 'T') || 'Unknown',
-    value: item.log_count,
+    id: String(item.device_id),
+    technique: item.device_name,
+    value: item.total_risk,
   }));
 
   const groupedData = processedData.reduce((acc: PieDataItem[], curr) => {
@@ -70,40 +70,42 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({
           textOverflow: 'ellipsis',
           fontSize: '16px',
         },
-        content: 'MITRE\nATT&CK',
+        content: 'Risk Distribution by Device',
       },
     },
     color: (datum) => {
       const technique =
         typeof datum.technique === 'string' ? datum.technique : '';
-      const num = parseInt(technique.replace(/\D/g, ''), 10) || 0;
+      let hash = 0;
+      for (let i = 0; i < technique.length; i++) {
+        hash = technique.charCodeAt(i) + ((hash << 5) - hash);
+      }
 
       const colors = [
-        '#FF6B6B',
-        '#4ECDC4',
-        '#45B7D1',
         '#FFA07A',
         '#98D8C8',
+        '#45B7D1',
         '#F06292',
-        '#7986CB',
         '#9575CD',
         '#64B5F6',
-        '#BA68C8',
         '#4DB6AC',
         '#FF8A65',
         '#A1887F',
+        '#4FC3F7',
         '#90A4AE',
         '#E57373',
+        '#DCE775',
+        '#BA68C8',
+        '#FF6B6B',
+        '#4ECDC4',
         '#81C784',
         '#FFD54F',
         '#AED581',
-        '#4FC3F7',
-        '#DCE775',
+        '#7986CB',
       ];
 
-      return colors[num % colors.length];
+      return colors[Math.abs(hash) % colors.length];
     },
-
     onReady: (plot) => {
       plot.on('element:click', (event: { data: { data: PieDataItem } }) => {
         const technique = event.data?.data?.technique;
@@ -117,4 +119,4 @@ const MitreAttackPieChart: React.FC<MitreAttackPieChartProps> = ({
   return <Pie {...pieConfig} style={{ height: '400px' }} />;
 };
 
-export default MitreAttackPieChart;
+export default RiskPieChart;

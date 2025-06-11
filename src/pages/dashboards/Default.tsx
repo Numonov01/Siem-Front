@@ -22,25 +22,23 @@ import { ReactNode, useEffect, useState } from 'react';
 import {
   fetchBarList,
   fetchMismatchesTable,
-  fetchMismatchesChart,
   DeviceRiskBar,
   fetchBarRiskList,
 } from '../../service/default';
 import {
   BarData,
   MismatchesItem,
-  MismatchesLevelChart,
   MismatchesResponse,
 } from '../../types/default';
 import { DeviceListData } from '../../types/device_list';
 import { Card, PageHeader } from '../../components';
 import { fetchDeviceList } from '../../service/device_list';
 import MitreAttackPieChart from './Charts/MitreAttackChart';
-import { MismatchesLevelLineChart } from './Charts/LineChart';
 import { SecurityEventsTable } from '../../components/dashboard/default/TabCard/SecurityEventsTable';
 import MitreAttackTable from './Charts/MitreAttackTable';
 import RiskTable from './Charts/RiskTable';
 import RiskPieChart from './Charts/RiskChart';
+import MismatchesLineChart from './Charts/LineCharts';
 
 const { TabPane } = Tabs;
 
@@ -139,8 +137,7 @@ export const DefaultDashboardPage = () => {
     results: [],
   });
   const [filteredData, setFilteredData] = useState<MismatchesItem[]>([]);
-  const [mismatchesChartData, setMismatchesChartData] =
-    useState<MismatchesLevelChart | null>(null);
+
   const [error, setError] = useState<ReactNode | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedTechnique, setSelectedTechnique] = useState<string | null>(
@@ -290,23 +287,6 @@ export const DefaultDashboardPage = () => {
     loadData();
   }, []);
 
-  // line chart data
-  useEffect(() => {
-    const loadChartData = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchMismatchesChart();
-        setMismatchesChartData(Array.isArray(data) ? data[0] ?? null : data);
-      } catch (error) {
-        console.error('Error fetching mismatches chart data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadChartData();
-  }, []);
-
   return (
     <div>
       <Helmet>
@@ -417,24 +397,8 @@ export const DefaultDashboardPage = () => {
         )}
 
         <Col xs={24} lg={24}>
-          <Card
-            title="Mismatches Level Trend"
-            extra={
-              <Popover
-                content="Trend of mismatches by severity level over time"
-                title="Mismatches Trend"
-              >
-                <Button icon={<QuestionOutlined />} {...POPOVER_BUTTON_PROPS} />
-              </Popover>
-            }
-            style={cardStyles}
-            loading={loading}
-          >
-            {mismatchesChartData ? (
-              <MismatchesLevelLineChart data={mismatchesChartData} />
-            ) : (
-              <Alert message="No chart data available" type="info" />
-            )}
+          <Card title="Mismatches Level Trend">
+            <MismatchesLineChart />
           </Card>
         </Col>
 

@@ -9,12 +9,12 @@ import {
   Typography,
 } from 'antd';
 import { DeviceListData } from '../../../../types/device_list';
-import { AppstoreOutlined, FileTextOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, ClusterOutlined } from '@ant-design/icons';
 import { ColumnType } from 'antd/es/table';
 
 const COLUMNS = (
-  onAppListClick: (deviceId: number) => void
-  // onTreeClick: (deviceId: number) => void
+  onAppListClick: (deviceId: number) => void,
+  onTreeClick: (deviceId: number) => void
 ): ColumnType<DeviceListData>[] => [
   {
     title: 'Name',
@@ -96,24 +96,7 @@ const COLUMNS = (
           </Button>
         </Tooltip>
 
-        <Tooltip title="View device logs">
-          <Button
-            size="small"
-            icon={<FileTextOutlined />}
-            onClick={() => console.log('Device Logs clicked:', record.pk)}
-            style={{
-              color: '#fa8c16',
-              borderColor: '#fa8c16',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
-            Logs
-          </Button>
-        </Tooltip>
-
-        {/* <Tooltip title="View process tree">
+        <Tooltip title="View process tree">
           <Button
             size="small"
             icon={<ClusterOutlined />}
@@ -128,7 +111,7 @@ const COLUMNS = (
           >
             Tree
           </Button>
-        </Tooltip> */}
+        </Tooltip>
       </Space>
     ),
   },
@@ -145,13 +128,13 @@ export const DeviceListTable = ({
   data,
   loading,
   onAppListClick,
-  // onTreeClick,
+  onTreeClick,
   ...others
 }: Props) => {
   return (
     <Table
       dataSource={data}
-      columns={COLUMNS(onAppListClick)}
+      columns={COLUMNS(onAppListClick, onTreeClick)}
       className="overflow-scroll"
       loading={loading}
       rowKey="pk"

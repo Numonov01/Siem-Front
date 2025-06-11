@@ -118,12 +118,6 @@ export const DevicesDashboardPage = () => {
                 <span>Dashboards</span>
               </>
             ),
-            // menu: {
-            //   items: DASHBOARD_ITEMS.map((d) => ({
-            //     key: d.title,
-            //     title: <Link to={d.path}>{d.title}</Link>,
-            //   })),
-            // },
           },
           {
             title: selectedDeviceId ? 'Applications' : 'Devices',

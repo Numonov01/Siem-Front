@@ -1,6 +1,7 @@
 import { Table, Typography, Tooltip, TagProps, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { ProcessListData } from '../../../../types/process_list';
+import { useState } from 'react';
 
 interface Props {
   processes: ProcessListData[];
@@ -9,7 +10,6 @@ interface Props {
 
 const { Text } = Typography;
 
-// Cmdline'ni formatlash: 10ta belgidan so'ng '...' va hoverda to‘liq ko‘rsatish
 const formatCmdline = (cmdline: string[]) => {
   if (!cmdline || cmdline.length === 0) return '-';
   const fullText = cmdline.join(' ');
@@ -22,6 +22,7 @@ const formatCmdline = (cmdline: string[]) => {
     </Tooltip>
   );
 };
+
 const formatExe = (exe: string) => {
   const shortened = exe.length > 20 ? exe.slice(0, 20) + '...' : exe;
 
@@ -44,30 +45,33 @@ const formatCwd = (cwd: string | null) => {
   );
 };
 
-// Tree structure yaratish (pid/ppid asosida)
-function buildTree(data: ProcessListData[]): ProcessListData[] {
+function buildTree(
+  data: ProcessListData[]
+): (ProcessListData & { children?: ProcessListData[]; level?: number })[] {
   const map = new Map<
     number,
-    ProcessListData & { children?: ProcessListData[] }
+    ProcessListData & { children?: ProcessListData[]; level?: number }
   >();
-  const roots: (ProcessListData & { children?: ProcessListData[] })[] = [];
+  const roots: (ProcessListData & {
+    children?: ProcessListData[];
+    level?: number;
+  })[] = [];
 
   data.forEach((item) => {
-    // Child bo'lmagan processlar uchun children ni undefined qilib qo'yamiz
-    map.set(item.pid, { ...item, children: [] });
+    map.set(item.pid, { ...item, children: [], level: 0 });
   });
 
   data.forEach((item) => {
     const parent = map.get(item.ppid);
     const node = map.get(item.pid);
     if (parent && node) {
+      node.level = (parent.level || 0) + 1;
       parent.children!.push(node);
     } else if (node) {
       roots.push(node);
     }
   });
 
-  // Child bo'lmagan processlarda children ni undefined qilamiz
   map.forEach((value) => {
     if (value.children && value.children.length === 0) {
       delete value.children;
@@ -77,13 +81,47 @@ function buildTree(data: ProcessListData[]): ProcessListData[] {
   return roots;
 }
 
-// Table columnlari
+const getRowStyle = (
+  record: ProcessListData & { level?: number },
+  expandedKeys: React.Key[]
+) => {
+  const isExpanded = expandedKeys.includes(record.pid);
+  const level = record.level || 0;
+
+  const levelColors = [
+    '#e6f7ff', // level 0
+    '#f6ffed', // level 1
+    '#fff7e6', // level 2
+    '#f9f0ff', // level 3
+    '#fff0f6', // level 4
+    '#f0f5ff', // level 5
+  ];
+
+  const baseColor = levelColors[Math.min(level, levelColors.length - 1)];
+
+  if (isExpanded) {
+    return {
+      background: `${baseColor}`,
+      borderLeft: `3px solid #1890ff`,
+    };
+  }
+
+  return {
+    background: `${baseColor}90`,
+    borderLeft: level > 0 ? `3px solid #d9d9d9` : 'none',
+  };
+};
+
 const columns: ColumnsType<ProcessListData> = [
   {
     title: 'Title',
     dataIndex: 'title',
     key: 'title',
-    render: (text: string) => <Text strong>{text}</Text>,
+    render: (text: string, record: ProcessListData & { level?: number }) => (
+      <Text strong style={{ paddingLeft: `${(record.level || 0) * 12}px` }}>
+        {text}
+      </Text>
+    ),
   },
   {
     title: 'Process',
@@ -150,9 +188,16 @@ const columns: ColumnsType<ProcessListData> = [
   },
 ];
 
-// Table componenti
 export const ProcessTableTree = ({ processes, loading }: Props) => {
+  const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const treeData = buildTree(processes);
+
+  const onExpand = (expanded: boolean, record: ProcessListData) => {
+    const keys = expanded
+      ? [...expandedKeys, record.pid]
+      : expandedKeys.filter((key) => key !== record.pid);
+    setExpandedKeys(keys);
+  };
 
   return (
     <Table
@@ -160,10 +205,17 @@ export const ProcessTableTree = ({ processes, loading }: Props) => {
       dataSource={treeData}
       rowKey="pid"
       loading={loading}
-      pagination={{}}
-      expandable={{ defaultExpandAllRows: true }}
+      pagination={false}
+      expandable={{
+        defaultExpandAllRows: true,
+        onExpand: onExpand,
+        expandedRowKeys: expandedKeys,
+      }}
       scroll={{ x: 'max-content' }}
       style={{ background: '#fff', padding: 16, borderRadius: 8 }}
+      onRow={(record) => ({
+        style: getRowStyle(record, expandedKeys),
+      })}
     />
   );
 };

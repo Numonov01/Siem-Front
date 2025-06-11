@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ConfigProvider, Layout, Menu, MenuProps, SiderProps } from 'antd';
 import {
+  IdcardOutlined,
   LaptopOutlined,
   OrderedListOutlined,
   PieChartOutlined,
@@ -66,6 +67,12 @@ const items: MenuProps['items'] = [
     <Link to={PATH_DASHBOARD.logistics}>Agents</Link>,
     'logistics',
     <LaptopOutlined />
+  ),
+
+  getItem(
+    <Link to={PATH_DASHBOARD.chat}>Chat</Link>,
+    'chat',
+    <IdcardOutlined />
   ),
 
   // getItem(

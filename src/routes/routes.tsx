@@ -11,6 +11,7 @@ import {
   SignInPage,
   SitemapPage,
   LogsListDashboardPage,
+  ChatDashboardPage,
   UserProfileDetailsPage,
   DevicesDashboardPage,
 } from '../pages';
@@ -78,6 +79,10 @@ const router = createBrowserRouter([
       {
         path: 'logistics',
         element: <DevicesDashboardPage />,
+      },
+      {
+        path: 'chat',
+        element: <ChatDashboardPage />,
       },
     ],
   },

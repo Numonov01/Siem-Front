@@ -26,7 +26,6 @@ export {
 } from './marketing';
 export {
   SocialStatsCard,
-  FollowersChart,
   LikesChart,
   DevicesCardChart,
   MilestonesCard,

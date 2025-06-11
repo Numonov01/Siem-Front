@@ -1,15 +1,15 @@
-import { Alert, Flex } from 'antd';
-import { PageHeader } from '../components';
-import {
-  BranchesOutlined,
-  HomeOutlined,
-  PieChartOutlined,
-} from '@ant-design/icons';
+import { Alert, Card, Flex } from 'antd';
+// import { PageHeader } from '../components';
+// import {
+//   BranchesOutlined,
+//   HomeOutlined,
+//   PieChartOutlined,
+// } from '@ant-design/icons';
 import { ReactNode, useEffect, useState } from 'react';
 import { fetchProcessList } from '../service/process_list';
 import { ProcessListData } from '../types/process_list';
-import { ProcessTableTree } from '../components/dashboard/projects/ProjectsTables/ProcessTreeView';
 import { useParams } from 'react-router-dom';
+import { ProcessTreeBox } from '../components/dashboard/projects/ProjectsTables/TreeView';
 
 export const AboutPage = () => {
   const [processes, setProcesses] = useState<ProcessListData[]>([]);
@@ -41,9 +41,9 @@ export const AboutPage = () => {
   return (
     <div>
       <Flex vertical gap="middle">
-        <PageHeader
+        {/* <PageHeader
           icon={<BranchesOutlined />}
-          title="Tree"
+          title="Process Tree"
           breadcrumbs={[
             {
               title: (
@@ -67,7 +67,7 @@ export const AboutPage = () => {
               title: 'tree',
             },
           ]}
-        />
+        /> */}
 
         {error ? (
           <Alert
@@ -77,8 +77,24 @@ export const AboutPage = () => {
             showIcon
           />
         ) : (
-          <ProcessTableTree processes={processes} loading={loading} />
+          <Card
+            title="Process Tree View"
+            style={{ borderRadius: 8, backgroundColor: '#ffff' }}
+            loading={loading}
+          >
+            <ProcessTreeBox processes={processes} />
+          </Card>
         )}
+        {/* {error ? (
+          <Alert
+            message="Error"
+            description={error.toString()}
+            type="error"
+            showIcon
+          />
+        ) : (
+          <ProcessTableTree processes={processes} loading={loading} />
+        )} */}
       </Flex>
     </div>
   );

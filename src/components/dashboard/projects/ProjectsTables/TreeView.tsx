@@ -54,66 +54,70 @@ const TreeNode: React.FC<{
 
   return (
     <div className="tree-node-wrapper">
-      {!isRoot && (
-        <div className="tree-connections">
-          {parentIsLast.map((isParentLast, index) => (
+      <div className="tree-node-content-wrapper">
+        {/* Connection Lines */}
+        {!isRoot && (
+          <div className="tree-connections">
+            {/* Vertical lines for parent levels */}
+            {parentIsLast.map((isParentLast, index) => (
+              <div
+                key={index}
+                className={`tree-vertical-line ${isParentLast ? '' : 'active'}`}
+                style={{ left: `${index * 64 + 16}px` }}
+              />
+            ))}
+
+            {/* L-shaped connector for current node */}
             <div
-              key={index}
-              className={`tree-vertical-connector ${
-                isParentLast ? 'hidden' : 'visible'
-              }`}
-              style={{ left: `${index * 32 + 16}px` }}
-            />
-          ))}
-
-          <div
-            className={`tree-current-connector ${
-              isLast ? 'last-child' : 'has-siblings'
-            }`}
-            style={{ left: `${level * 32 + 16}px` }}
-          />
-
-          <div
-            className="tree-horizontal-connector"
-            style={{ left: `${level * 32 + 16}px` }}
-          />
-        </div>
-      )}
-
-      <div
-        className={`tree-node-content ${isRoot ? 'root-node' : ''}`}
-        style={{
-          marginLeft: isRoot ? 0 : level * 32 + 24,
-          backgroundColor: getBackgroundColor(level),
-        }}
-      >
-        <div className="tree-node-header">
-          <Text strong>{node.title || node.exe}</Text>
-          <ProcessTypeTag type={node.process_type} />
-        </div>
-
-        <div className="tree-node-pids">
-          <Text type="secondary">PID: {node.pid}</Text>
-          <Text type="secondary">PPID: {node.ppid}</Text>
-        </div>
-
-        {node.exe && (
-          <div className="tree-node-path">
-            <Tooltip title={node.exe}>
-              <Text type="secondary">
-                Path:{' '}
-                {node.exe.length > 35
-                  ? `${node.exe.substring(0, 35)}...`
-                  : node.exe}
-              </Text>
-            </Tooltip>
+              className="tree-connector"
+              style={{ left: `${(level - 1) * 64 + 16}px` }}
+            >
+              <div
+                className={`connector-vertical ${
+                  isLast ? 'last' : 'continuing'
+                }`}
+              />
+              <div className="connector-horizontal" />
+            </div>
           </div>
         )}
 
-        <div className="tree-node-time">
-          <Text type="secondary">
-            Created: {new Date(node.create_time).toLocaleString()}
-          </Text>
+        {/* Node Content */}
+        <div
+          className={`tree-node-content ${isRoot ? 'root-node' : ''}`}
+          style={{
+            marginLeft: level * 64,
+            backgroundColor: getBackgroundColor(level),
+          }}
+        >
+          <div className="tree-node-header">
+            <Text strong>{node.title || node.exe}</Text>
+            <ProcessTypeTag type={node.process_type} />
+          </div>
+
+          <div className="tree-node-pids">
+            <Text type="secondary">PID: {node.pid}</Text>
+            <Text type="secondary">PPID: {node.ppid}</Text>
+          </div>
+
+          {node.exe && (
+            <div className="tree-node-path">
+              <Tooltip title={node.exe}>
+                <Text type="secondary">
+                  Path:{' '}
+                  {node.exe.length > 40
+                    ? `${node.exe.substring(0, 40)}...`
+                    : node.exe}
+                </Text>
+              </Tooltip>
+            </div>
+          )}
+
+          <div className="tree-node-time">
+            <Text type="secondary">
+              Created: {new Date(node.create_time).toLocaleString()}
+            </Text>
+          </div>
         </div>
       </div>
 
@@ -142,12 +146,12 @@ const TreeNode: React.FC<{
 
 const getBackgroundColor = (level: number) => {
   const colors = [
-    '#e6f7ff', // level 0 - root
-    '#f6ffed', // level 1
-    '#fff7e6', // level 2
-    '#f9f0ff', // level 3
-    '#fff0f6', // level 4
-    '#f0f5ff', // level 5
+    '#f0f9ff',
+    '#f0fdf4',
+    '#fff7ed',
+    '#faf5ff',
+    '#fff1f2',
+    '#eff6ff',
   ];
   return colors[Math.min(level, colors.length - 1)];
 };

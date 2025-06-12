@@ -80,7 +80,7 @@ export const SecurityEventsTable = ({
         pageSizeOptions: ['10', '20', '50', '100'],
         onChange: onPageChange,
       }}
-      locale={{ emptyText: loading ? 'Loading...' : 'No data found' }}
+      locale={{ emptyText: loading }}
     />
   );
 };

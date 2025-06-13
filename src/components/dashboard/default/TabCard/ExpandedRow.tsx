@@ -82,14 +82,38 @@ export const ExpandedRow = ({ record }: { record: MismatchesItem }) => {
     if (!ruleData) return [];
 
     return [
-      { field: 'Title', value: ruleData.title },
-      { field: 'Description', value: ruleData.description },
-      { field: 'Status', value: ruleData.status },
-      { field: 'Level', value: ruleData.level },
-      { field: 'Tags', value: ruleData.tags.join(' => ') },
-      { field: 'References', value: ruleData.references.join(' => ') },
-      { field: 'Author', value: ruleData.author },
-      { field: 'Date', value: ruleData.date },
+      {
+        field: 'Title',
+        value: ruleData.title,
+      },
+      {
+        field: 'Description',
+        value: ruleData.description,
+      },
+      {
+        field: 'Status',
+        value: ruleData.status,
+      },
+      {
+        field: 'Level',
+        value: ruleData.level,
+      },
+      {
+        field: 'Tags',
+        value: ruleData.tags.join(' => '),
+      },
+      {
+        field: 'References',
+        value: ruleData.references.join(' => '),
+      },
+      {
+        field: 'Author',
+        value: ruleData.author,
+      },
+      {
+        field: 'Date',
+        value: ruleData.date,
+      },
     ];
   };
 
@@ -97,15 +121,42 @@ export const ExpandedRow = ({ record }: { record: MismatchesItem }) => {
     if (!logData) return [];
 
     return [
-      { field: 'Event ID', value: logData.EventId },
-      { field: 'User', value: logData.Event?.User },
-      { field: 'Image', value: logData.Event?.Image },
-      { field: 'Company', value: logData.Event?.Company },
-      { field: 'Command Line', value: logData.Event?.CommandLine },
-      { field: 'Parent Image', value: logData.Event?.ParentImage },
-      { field: 'Parent Command Line', value: logData.Event?.ParentCommandLine },
-      { field: 'Original File Name', value: logData.Event?.OriginalFileName },
-      { field: 'Integrity Level', value: logData.Event?.IntegrityLevel },
+      {
+        field: 'Event ID',
+        value: logData.EventId,
+      },
+      {
+        field: 'User',
+        value: logData.Event?.User,
+      },
+      {
+        field: 'Image',
+        value: logData.Event?.Image,
+      },
+      {
+        field: 'Company',
+        value: logData.Event?.Company,
+      },
+      {
+        field: 'Command Line',
+        value: logData.Event?.CommandLine,
+      },
+      {
+        field: 'Parent Image',
+        value: logData.Event?.ParentImage,
+      },
+      {
+        field: 'Parent Command Line',
+        value: logData.Event?.ParentCommandLine,
+      },
+      {
+        field: 'Original File Name',
+        value: logData.Event?.OriginalFileName,
+      },
+      {
+        field: 'Integrity Level',
+        value: logData.Event?.IntegrityLevel,
+      },
       {
         field: 'UTC Time',
         value: logData.Event?.UtcTime

@@ -1,7 +1,7 @@
 .curved-tree-container {
   background: #fff;
   overflow: auto;
-  max-height: 80vh;
+  max-height: 800vh;
   position: relative;
 }
 
@@ -306,68 +306,5 @@
   .tree-node-pids {
     flex-direction: column;
     gap: 4px;
-  }
-}
-
-/* Loading State */
-.curved-tree-container.loading {
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.curved-tree-container.loading::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 40px;
-  height: 40px;
-  margin: -20px 0 0 -20px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #1890ff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Focus and Accessibility */
-.curved-tree-node:focus {
-  outline: 2px solid #1890ff;
-  outline-offset: 2px;
-}
-
-.curved-tree-node[aria-selected='true'] {
-  border-color: #1890ff;
-  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.2);
-}
-
-/* Print Styles */
-@media print {
-  .curved-tree-container {
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
-
-  .curved-tree-node {
-    box-shadow: none;
-    border: 1px solid #999;
-    height: 160px !important; /* Show all content when printing */
-  }
-
-  .tree-node-hover-content {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-  }
-
-  .connection-path {
-    stroke: #333 !important;
   }
 }

@@ -1,4 +1,4 @@
-import { Tag, Tooltip, Typography } from 'antd';
+import { Tag, Tooltip, Typography, Button } from 'antd';
 import { ProcessListData } from '../../../../types/process_list';
 import './ProcessTreeView.css';
 import { useEffect, useState } from 'react';
@@ -10,11 +10,15 @@ type ProcessTreeNode = ProcessListData & {
   x?: number;
   y?: number;
   level?: number;
+  showAllChildren?: boolean;
+  visibleChildren?: ProcessTreeNode[];
 };
 
 interface ProcessTreeBoxProps {
   processes: ProcessListData[];
 }
+
+const INITIAL_CHILDREN_LIMIT = 8;
 
 const buildTree = (data: ProcessListData[]): ProcessTreeNode[] => {
   const treeMap: { [pid: number]: ProcessTreeNode } = {};
@@ -24,6 +28,8 @@ const buildTree = (data: ProcessListData[]): ProcessTreeNode[] => {
     treeMap[item.pid] = {
       ...item,
       children: [],
+      showAllChildren: false,
+      visibleChildren: [],
     };
   });
 
@@ -34,6 +40,14 @@ const buildTree = (data: ProcessListData[]): ProcessTreeNode[] => {
       rootNodes.push(treeMap[item.pid]);
     }
   });
+
+  // Initialize visible children for each node
+  const initializeVisibleChildren = (node: ProcessTreeNode) => {
+    node.visibleChildren = node.children.slice(0, INITIAL_CHILDREN_LIMIT);
+    node.children.forEach((child) => initializeVisibleChildren(child));
+  };
+
+  rootNodes.forEach((node) => initializeVisibleChildren(node));
 
   return rootNodes;
 };
@@ -49,7 +63,8 @@ const calculatePositions = (
     if (!levels[level]) levels[level] = [];
     node.level = level;
     levels[level].push(node);
-    node.children.forEach((child) => assignLevels(child, level + 1));
+    // Use visibleChildren instead of all children for positioning
+    node.visibleChildren?.forEach((child) => assignLevels(child, level + 1));
   };
 
   nodes.forEach((node) => assignLevels(node, 0));
@@ -111,7 +126,43 @@ const CurvedConnection: React.FC<{
   );
 };
 
-const ProcessNode: React.FC<{ node: ProcessTreeNode }> = ({ node }) => {
+const ShowMoreButton: React.FC<{
+  node: ProcessTreeNode;
+  onShowMore: (node: ProcessTreeNode) => void;
+}> = ({ node, onShowMore }) => {
+  const hiddenCount =
+    node.children.length - (node.visibleChildren?.length || 0);
+
+  if (hiddenCount <= 0) return null;
+
+  return (
+    <Button
+      size="small"
+      type="link"
+      onClick={(e) => {
+        e.stopPropagation();
+        onShowMore(node);
+      }}
+      style={{
+        fontSize: '10px',
+        height: '20px',
+        padding: '0 6px',
+        color: '#1890ff',
+        background: 'rgba(24, 144, 255, 0.1)',
+        border: '1px solid rgba(24, 144, 255, 0.3)',
+        borderRadius: '10px',
+        marginTop: '4px',
+      }}
+    >
+      +{hiddenCount} more children
+    </Button>
+  );
+};
+
+const ProcessNode: React.FC<{
+  node: ProcessTreeNode;
+  onShowMore: (node: ProcessTreeNode) => void;
+}> = ({ node, onShowMore }) => {
   if (!node.x || !node.y) return null;
 
   const getBackgroundColor = (level: number) => {
@@ -166,42 +217,76 @@ const ProcessNode: React.FC<{ node: ProcessTreeNode }> = ({ node }) => {
             Created: {new Date(node.create_time).toLocaleString()}
           </Text>
         </div>
+
+        {node.children.length > 0 && (
+          <div className="tree-node-children-count">
+            <ShowMoreButton node={node} onShowMore={onShowMore} />
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export const ProcessTreeBox = ({ processes }: ProcessTreeBoxProps) => {
-  const treeData = buildTree(processes);
+  const [treeData, setTreeData] = useState<ProcessTreeNode[]>([]);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  // Calculate container dimensions based on tree structure
-  const maxLevels =
-    Math.max(
-      ...treeData.map((node) => {
-        let maxLevel = 0;
-        const countLevels = (n: ProcessTreeNode, level: number) => {
-          maxLevel = Math.max(maxLevel, level);
-          n.children.forEach((child) => countLevels(child, level + 1));
+  // Initialize tree data
+  useEffect(() => {
+    setTreeData(buildTree(processes));
+  }, [processes]);
+
+  const handleShowMore = (node: ProcessTreeNode) => {
+    const updateNode = (nodes: ProcessTreeNode[]): ProcessTreeNode[] => {
+      return nodes.map((n) => {
+        if (n.pid === node.pid) {
+          return {
+            ...n,
+            showAllChildren: true,
+            visibleChildren: n.children,
+          };
+        }
+        return {
+          ...n,
+          visibleChildren: n.visibleChildren
+            ? updateNode(n.visibleChildren)
+            : [],
         };
-        countLevels(node, 0);
-        return maxLevel;
-      })
-    ) + 1;
+      });
+    };
 
-  const maxNodesPerLevel = Math.max(
-    ...Array.from({ length: maxLevels }, (_, level) => {
-      const nodesAtLevel: ProcessTreeNode[] = [];
-      const countAtLevel = (node: ProcessTreeNode, currentLevel: number) => {
-        if (currentLevel === level) nodesAtLevel.push(node);
-        node.children.forEach((child) => countAtLevel(child, currentLevel + 1));
-      };
-      treeData.forEach((node) => countAtLevel(node, 0));
-      return nodesAtLevel.length;
-    })
-  );
+    setTreeData((prevData) => updateNode(prevData));
+  };
 
+  // Calculate container dimensions based on visible tree structure
+  const calculateTreeDimensions = (nodes: ProcessTreeNode[]) => {
+    let maxLevels = 0;
+    let maxNodesPerLevel = 0;
+
+    const countLevels = (node: ProcessTreeNode, level: number) => {
+      maxLevels = Math.max(maxLevels, level);
+      node.visibleChildren?.forEach((child) => countLevels(child, level + 1));
+    };
+
+    nodes.forEach((node) => countLevels(node, 0));
+    maxLevels += 1;
+
+    // Count nodes at each level
+    const levelCounts = Array(maxLevels).fill(0);
+    const countAtLevel = (node: ProcessTreeNode, level: number) => {
+      levelCounts[level]++;
+      node.visibleChildren?.forEach((child) => countAtLevel(child, level + 1));
+    };
+
+    nodes.forEach((node) => countAtLevel(node, 0));
+    maxNodesPerLevel = Math.max(...levelCounts);
+
+    return { maxLevels, maxNodesPerLevel };
+  };
+
+  const { maxLevels, maxNodesPerLevel } = calculateTreeDimensions(treeData);
   const containerWidth = Math.max(maxLevels * 800, 1000);
   const containerHeight = Math.max(maxNodesPerLevel * 100 + 100, 600);
 
@@ -211,11 +296,11 @@ export const ProcessTreeBox = ({ processes }: ProcessTreeBoxProps) => {
     containerHeight
   );
 
-  // Create connections
+  // Create connections using only visible children
   const connections: Array<{ from: ProcessTreeNode; to: ProcessTreeNode }> = [];
 
   const addConnections = (node: ProcessTreeNode) => {
-    node.children.forEach((child) => {
+    node.visibleChildren?.forEach((child) => {
       connections.push({ from: node, to: child });
       addConnections(child);
     });
@@ -334,7 +419,7 @@ export const ProcessTreeBox = ({ processes }: ProcessTreeBoxProps) => {
 
         {/* Process nodes */}
         {allNodes.map((node) => (
-          <ProcessNode key={node.pid} node={node} />
+          <ProcessNode key={node.pid} node={node} onShowMore={handleShowMore} />
         ))}
       </div>
     </div>

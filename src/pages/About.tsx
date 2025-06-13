@@ -75,16 +75,6 @@ export const AboutPage = () => {
             <ProcessTreeBox processes={processes} />
           </Card>
         )}
-        {/* {error ? (
-          <Alert
-            message="Error"
-            description={error.toString()}
-            type="error"
-            showIcon
-          />
-        ) : (
-          <ProcessTableTree processes={processes} loading={loading} />
-        )} */}
       </Flex>
     </div>
   );

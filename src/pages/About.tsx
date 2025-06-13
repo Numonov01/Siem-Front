@@ -1,15 +1,11 @@
-import { Alert, Card, Flex } from 'antd';
-// import { PageHeader } from '../components';
-// import {
-//   BranchesOutlined,
-//   HomeOutlined,
-//   PieChartOutlined,
-// } from '@ant-design/icons';
+import { Alert, Card, Flex, Button } from 'antd';
 import { ReactNode, useEffect, useState } from 'react';
 import { fetchProcessList } from '../service/process_list';
 import { ProcessListData } from '../types/process_list';
 import { useParams } from 'react-router-dom';
 import { ProcessTreeBox } from '../components/dashboard/projects/ProjectsTables/TreeView';
+import { ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons';
+import ButtonGroup from 'antd/es/button/button-group';
 
 export const AboutPage = () => {
   const [processes, setProcesses] = useState<ProcessListData[]>([]);
@@ -41,34 +37,6 @@ export const AboutPage = () => {
   return (
     <div>
       <Flex vertical gap="middle">
-        {/* <PageHeader
-          icon={<BranchesOutlined />}
-          title="Process Tree"
-          breadcrumbs={[
-            {
-              title: (
-                <>
-                  <HomeOutlined />
-                  <span>home</span>
-                </>
-              ),
-              path: '/',
-            },
-            {
-              title: (
-                <>
-                  <PieChartOutlined />
-                  <span>dashboards</span>
-                </>
-              ),
-              path: '/dashboards',
-            },
-            {
-              title: 'tree',
-            },
-          ]}
-        /> */}
-
         {error ? (
           <Alert
             message="Error"
@@ -81,20 +49,32 @@ export const AboutPage = () => {
             title="Process Tree View"
             style={{ borderRadius: 8, backgroundColor: '#ffff' }}
             loading={loading}
+            extra={
+              <ButtonGroup>
+                <Button
+                  icon={<ZoomInOutlined />}
+                  onClick={() =>
+                    document
+                      .querySelector('.curved-tree-content')
+                      ?.dispatchEvent(new CustomEvent('zoom', { detail: 'in' }))
+                  }
+                />
+                <Button
+                  icon={<ZoomOutOutlined />}
+                  onClick={() =>
+                    document
+                      .querySelector('.curved-tree-content')
+                      ?.dispatchEvent(
+                        new CustomEvent('zoom', { detail: 'out' })
+                      )
+                  }
+                />
+              </ButtonGroup>
+            }
           >
             <ProcessTreeBox processes={processes} />
           </Card>
         )}
-        {/* {error ? (
-          <Alert
-            message="Error"
-            description={error.toString()}
-            type="error"
-            showIcon
-          />
-        ) : (
-          <ProcessTableTree processes={processes} loading={loading} />
-        )} */}
       </Flex>
     </div>
   );
